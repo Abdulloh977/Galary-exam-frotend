@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Backend serverimizning asosiy manzili
-const BASE_URL = "http://localhost:4005/api";
+const BASE_URL = "http://localhost:4000/api";
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
