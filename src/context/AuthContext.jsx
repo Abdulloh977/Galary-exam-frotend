@@ -1,15 +1,15 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { loginApi, signupApi, googleLoginApi } from "../api/authApi.js"; // api faylingiz yo'li
+import axiosInstance from "../api/axiosInstance.js"; // axiosInstance yo'li
 
 const AuthContext = createContext();
 
-// Boshqa fayllarda oson foydalanish uchun maxsus hook
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Sahifa yangilanganda localStorage'dan foydalanuvchini tiklaymiz
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -18,12 +18,50 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // Login/Signup muvaffaqiyatli bo'lganda chaqiriladi
-  const login = (userData, token) => {
-    localStorage.setItem("user", JSON.stringify(userData));
-    localStorage.setItem("token", token);
-    setUser(userData);
+  const loginAction = async (credentials) => {
+    try {
+      const response = await loginApi(credentials);
+      const { user, token } = response.data; 
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("token", token);
+      setUser(user);
+      return { success: true };
+    } catch (error) {
+      const errorMsg = error.response?.data?.message || "Tizimga kirishda xatolik";
+      return { success: false, message: errorMsg };
+    }
   };
+
+  const signupAction = async (userData) => {
+    try {
+      const response = await signupApi(userData);
+      const { user, token } = response.data;
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("token", token);
+      setUser(user);
+      return { success: true };
+    } catch (error) {
+      const errorMsg = error.response?.data?.message || "Ro'yxatdan o'tishda xatolik";
+      return { success: false, message: errorMsg };
+    }
+  };
+
+  // AuthProvider ichidagi funksiya:
+    const loginWithGoogleAction = async (googleToken) => {
+      try {
+        // Endi to'g'ridan-to'g'ri tayyor API funksiyamizni chaqiramiz
+        const response = await googleLoginApi({ token: googleToken });
+        const { user, token } = response.data;
+
+        localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("token", token);
+        setUser(user);
+        return { success: true };
+      } catch (error) {
+        const errorMsg = error.response?.data?.message || "Google orqali kirishda xatolik";
+        return { success: false, message: errorMsg };
+      }
+    };
 
   const logout = () => {
     localStorage.removeItem("user");
@@ -32,7 +70,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login: loginAction, signup: signupAction, loginWithGoogle: loginWithGoogleAction, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
