@@ -6,34 +6,28 @@ function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [googleReady, setGoogleReady] = useState(false); // Google tayyorligini tekshirish statisi
+  const [googleReady, setGoogleReady] = useState(false);
 
-  // SKRIPTNI MAJBURIY VA ASINXRON YUKLASH TIZIMI
+  // 1. GOOGLE KUTUBXONASINI TEKSHIRISH (XUDDI REGISTERDAGIDEK)
   useEffect(() => {
-    const loadGoogleScript = () => {
-      if (window.google && window.google.accounts && window.google.accounts.id) {
-        setGoogleReady(true);
-        return;
-      }
+    if (window.google && window.google.accounts && window.google.accounts.id) {
+      setGoogleReady(true);
+      return;
+    }
 
-      // Agar skript html ichida bo'lmasa, uni yaratamiz
-      let script = document.querySelector('script[src="https://google.com"]');
-      if (!script) {
-        script = document.createElement('script');
-        script.src = "https://google.com";
-        script.async = true;
-        script.defer = true;
-        document.head.appendChild(script);
-      }
+    let script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+    if (!script) {
+      script = document.createElement('script');
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
 
-      script.onload = () => {
-        setGoogleReady(true);
-      };
+    script.onload = () => {
+      setGoogleReady(true);
     };
 
-    loadGoogleScript();
-
-    // Har ehtimolga qarshi, 500 millisoniyadan keyin qayta tekshirib qo'yish
     const timer = setInterval(() => {
       if (window.google && window.google.accounts && window.google.accounts.id) {
         setGoogleReady(true);
@@ -43,6 +37,38 @@ function Login() {
 
     return () => clearInterval(timer);
   }, []);
+
+  // 2. RASMIY GOOGLE TUGMASINI INITIALIZE VA RENDER QILISH
+  useEffect(() => {
+    if (googleReady && window.google?.accounts?.id) {
+      window.google.accounts.id.initialize({
+        client_id: "380649079838-6tutq6rua4vgfikmavshaj0f7u394pd2.apps.googleusercontent.com", 
+        callback: async (response) => {
+          try {
+            setError('');
+            setSubmitting(true);
+            const result = await loginWithGoogle(response.credential);
+            setSubmitting(false);
+            
+            if (result.success) {
+              window.location.href = "/"; 
+            } else {
+              setError(result.message);
+            }
+          } catch (err) {
+            setSubmitting(false);
+            setError("Google orqali tizimga kirishda xatolik.");
+          }
+        }
+      });
+
+      // Google o'zining rasmiy tugmasini ushbu div ichiga chizadi
+      window.google.accounts.id.renderButton(
+        document.getElementById("googleRegisterButton"),
+        { theme: "outline", size: "large", width: "100%", text: "signin_with" }
+      );
+    }
+  }, [googleReady]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -60,37 +86,6 @@ function Login() {
       window.location.href = "/"; 
     } else {
       setError(result.message);
-    }
-  };
-
-  const handleGoogleLogin = () => {
-    // Agar skript tayyor bo'lsa yoki window ichida aniqlansa ishga tushadi
-    if (googleReady || (window.google && window.google.accounts && window.google.accounts.id)) {
-      window.google.accounts.id.initialize({
-        // DIQQAT: Bu yerga Register sahifasida ishlatgan o'sha haqiqiy Client ID'ni qo'ying!
-        client_id: "://googleusercontent.com", 
-        callback: async (response) => {
-          try {
-            setError('');
-            setSubmitting(true);
-            const result = await loginWithGoogle(response.credential);
-            setSubmitting(false);
-            
-            if (result.success) {
-              window.location.href = "/"; 
-            } else {
-              setError(result.message);
-            }
-          } catch (err) {
-            setSubmitting(false);
-            setError("Google login tizimida kutilmagan xatolik.");
-          }
-        }
-      });
-
-      window.google.accounts.id.prompt();
-    } else {
-      setError("Google tizimi yuklanmoqda, iltimos 2 soniya kutib qayta bosing.");
     }
   };
 
@@ -142,12 +137,16 @@ function Login() {
                   </span>
                 </div>
 
-                <div className="d-flex gap-2 justify-content-center">
-                  <button type="button" onClick={handleGoogleLogin} className="btn btn-outline-danger d-flex align-items-center justify-content-center gap-2 rounded-3 py-2 px-3 fw-semibold w-50 small shadow-sm">
-                    <i className="bi bi-google fs-5"></i> Google
-                  </button>
-                  <button type="button" onClick={handleTwitterLogin} className="btn btn-outline-dark d-flex align-items-center justify-content-center gap-2 rounded-3 py-2 px-3 fw-semibold w-50 small shadow-sm">
-                    <i className="bi bi-twitter-x fs-5"></i> Twitter
+                <div className="d-flex flex-column gap-2 justify-content-center align-items-center w-100">
+                  {/* GOOGLE RASMIY TUGMASI JOYLASHADIGAN DIV */}
+                  <div id="googleRegisterButton" className="w-100 shadow-sm"></div>
+
+                  <button 
+                    type="button" 
+                    onClick={handleTwitterLogin} 
+                    className="btn btn-outline-dark d-flex align-items-center justify-content-center gap-2 rounded-3 py-2 px-3 fw-semibold w-100 small shadow-sm mt-1"
+                  >
+                    <i className="bi bi-twitter-x fs-5"></i> Twitter orqali kirish
                   </button>
                 </div>
               </div>

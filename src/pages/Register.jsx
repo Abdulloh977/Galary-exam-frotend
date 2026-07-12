@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // useEffect qo'shildi
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx'; 
 
 function Register() {
@@ -13,18 +13,70 @@ function Register() {
   
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [googleReady, setGoogleReady] = useState(false);
 
-  // AQLLI TEKSHIRUV: Sahifa yuklanganda Google skripti borligini majburiy tekshiramiz
+  // 1. RASMIY GOOGLE IDENTITY SCRIPTINI NAZORAT QILISH
   useEffect(() => {
-    if (!window.google) {
-      const script = document.createElement('script');
+    if (window.google && window.google.accounts && window.google.accounts.id) {
+      setGoogleReady(true);
+      return;
+    }
+
+    let script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+    if (!script) {
+      script = document.createElement('script');
       script.src = "https://accounts.google.com/gsi/client";
       script.async = true;
       script.defer = true;
-      script.onload = () => console.log("Google API muvaffaqiyatli yuklandi!");
       document.head.appendChild(script);
     }
+
+    script.onload = () => {
+      setGoogleReady(true);
+    };
+
+    const timer = setInterval(() => {
+      if (window.google && window.google.accounts && window.google.accounts.id) {
+        setGoogleReady(true);
+        clearInterval(timer);
+      }
+    }, 500);
+
+    return () => clearInterval(timer);
   }, []);
+
+  // 2. REGISTER SAHIFASIDA GOOGLE TUGMASINI CHIQARISH
+  useEffect(() => {
+    if (googleReady && window.google?.accounts?.id) {
+      window.google.accounts.id.initialize({
+        // O'zingizning haqiqiy Google Client ID kodingiz qo'yildi:
+        client_id: "380649079838-6tutq6rua4vgfikmavshaj0f7u394pd2.apps.googleusercontent.com", 
+        callback: async (response) => {
+          try {
+            setError('');
+            setSubmitting(true);
+            const result = await loginWithGoogle(response.credential);
+            setSubmitting(false);
+            
+            if (result.success) {
+              window.location.href = "/"; 
+            } else {
+              setError(result.message);
+            }
+          } catch (err) {
+            setSubmitting(false);
+            setError("Google orqali ro'yxatdan o'tishda xatolik.");
+          }
+        }
+      });
+
+      // Google o'zining rasmiy tugmasini shu div ichiga joylaydi
+      window.google.accounts.id.renderButton(
+        document.getElementById("googleRegisterButton"),
+        { theme: "outline", size: "large", width: "100%", text: "signup_with" }
+      );
+    }
+  }, [googleReady]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -42,32 +94,6 @@ function Register() {
       window.location.href = "/"; 
     } else {
       setError(result.message); 
-    }
-  };
-
-  const handleGoogleLogin = () => {
-    // Agar to'g'ridan-to'g'ri yuklangan bo'lsa yoki dinamik yuklangan bo'lsa ham ishlaydi
-    if (window.google && window.google.accounts && window.google.accounts.id) {
-      window.google.accounts.id.initialize({
-        // BU YERGA O'ZINGIZNING GOOGLE CLIENT ID KODINGIZNI QO'YING:
-        client_id: "7534567890-abcdefg.apps.googleusercontent.com", 
-        callback: async (response) => {
-          setError('');
-          setSubmitting(true);
-          const result = await loginWithGoogle(response.credential);
-          setSubmitting(false);
-          
-          if (result.success) {
-            window.location.href = "/"; 
-          } else {
-            setError(result.message);
-          }
-        }
-      });
-
-      window.google.accounts.id.prompt();
-    } else {
-      setError("Google tizimi internet yoki kesh tufayli kechikmoqda. Sahifani qayta yangilang.");
     }
   };
 
@@ -145,12 +171,12 @@ function Register() {
                   </span>
                 </div>
 
-                <div className="d-flex gap-2 justify-content-center">
-                  <button type="button" onClick={handleGoogleLogin} className="btn btn-outline-danger d-flex align-items-center justify-content-center gap-2 rounded-3 py-2 px-3 fw-semibold w-50 small shadow-sm">
-                    <i className="bi bi-google fs-5"></i> Google
-                  </button>
-                  <button type="button" onClick={handleTwitterLogin} className="btn btn-outline-dark d-flex align-items-center justify-content-center gap-2 rounded-3 py-2 px-3 fw-semibold w-50 small shadow-sm">
-                    <i className="bi bi-twitter-x fs-5"></i> Twitter
+                <div className="d-flex flex-column gap-2 justify-content-center align-items-center">
+                  {/* GOOGLE RASMIY TUGMASI DIVI */}
+                  <div id="googleRegisterButton" className="w-100 shadow-sm"></div>
+
+                  <button type="button" onClick={handleTwitterLogin} className="btn btn-outline-dark d-flex align-items-center justify-content-center gap-2 rounded-3 py-2 px-3 fw-semibold w-100 small shadow-sm mt-1">
+                    <i className="bi bi-twitter-x fs-5"></i> Twitter orqali ro'yxatdan o'tish
                   </button>
                 </div>
               </div>

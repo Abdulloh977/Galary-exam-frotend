@@ -14,7 +14,6 @@ const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Ikkala so'rovni bir vaqtda yuboramiz — tezroq yuklanishi uchun
         const [allRes, topRes] = await Promise.all([
           getAllPinsApi(),
           getTopPinsApi(),
@@ -32,10 +31,12 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="d-flex">
-      <Sidebar />
+    <div className="d-flex vh-100 overflow-hidden">
+      <div className="flex-shrink-0 h-100">
+        <Sidebar />
+      </div>
 
-      <div className="flex-grow-1 p-4">
+      <div className="flex-grow-1 h-100 overflow-y-auto p-4">
         <div className="d-flex align-items-center mb-4">
           <SearchBar />
         </div>

@@ -83,7 +83,7 @@ const Sidebar = () => {
             {showAccount && (
               <div
                 className="position-absolute bg-white rounded-3 shadow p-3"
-                style={{ left: "56px", bottom: 0, width: "220px" }}
+                style={{ left: "56px", bottom: 0, width: "360px" }}
               >
                 <p className="text-secondary small mb-2">Currently in</p>
                 <div className="d-flex align-items-center gap-2 mb-3">
