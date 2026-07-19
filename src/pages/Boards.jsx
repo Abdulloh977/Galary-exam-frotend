@@ -23,14 +23,6 @@ const Boards = () => {
   const [editingBoard, setEditingBoard] = useState(null);
   const [editTitle, setEditTitle] = useState("");
 
-  const suggestedCategories = [
-    { icon: "bi-tree", label: t("category_nature") },
-    { icon: "bi-airplane", label: t("category_travel") },
-    { icon: "bi-bag-heart", label: t("category_fashion") },
-    { icon: "bi-cup-hot", label: t("category_food") },
-    { icon: "bi-palette", label: t("category_art") },
-  ];
-
   const fetchBoards = async () => {
     try {
       setLoading(true);
@@ -53,20 +45,6 @@ const Boards = () => {
     try {
       await createBoardApi({ title: newTitle.trim() });
       setNewTitle("");
-      fetchBoards();
-    } catch (error) {
-      console.error("Kategoriya yaratishda xatolik:", error);
-    }
-  };
-
-  const handleQuickCreate = async (label) => {
-    const alreadyExists = boards.some(
-      (b) => b.title.toLowerCase() === label.toLowerCase()
-    );
-    if (alreadyExists) return;
-
-    try {
-      await createBoardApi({ title: label });
       fetchBoards();
     } catch (error) {
       console.error("Kategoriya yaratishda xatolik:", error);
@@ -118,20 +96,6 @@ const Boards = () => {
           <i className="bi bi-plus-lg me-1"></i> {t("create")}
         </button>
       </form>
-
-      <p className="text-secondary small mb-2">{t("suggested_categories")}</p>
-      <div className="d-flex gap-2 flex-wrap mb-4">
-        {suggestedCategories.map((cat) => (
-          <button
-            key={cat.label}
-            className="btn btn-outline-dark rounded-pill btn-sm"
-            onClick={() => handleQuickCreate(cat.label)}
-          >
-            <i className={`bi ${cat.icon} me-1`}></i>
-            {cat.label}
-          </button>
-        ))}
-      </div>
 
       {loading ? (
         <Loader />

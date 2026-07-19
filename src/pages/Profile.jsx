@@ -6,6 +6,7 @@ import MasonryGrid from "../components/MasonryGrid";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { getProfileApi } from "../api/userApi";
+import { deletePinApi } from "../api/pinApi";
 
 const Profile = () => {
   const { id } = useParams();
@@ -52,6 +53,18 @@ const Profile = () => {
       return;
     }
     navigate(`/chat/${id}`);
+  };
+
+  const handleDeletePin = async (pinId) => {
+    const confirmed = window.confirm(t("confirm_delete_pin"));
+    if (!confirmed) return;
+
+    try {
+      await deletePinApi(pinId);
+      setPins((prev) => prev.filter((p) => p._id !== pinId));
+    } catch (error) {
+      console.error("Rasmni o'chirishda xatolik:", error);
+    }
   };
 
   if (loading) {
@@ -139,7 +152,11 @@ const Profile = () => {
       </div>
 
       {activeTab === "pins" ? (
-        <MasonryGrid pins={pins} />
+        <MasonryGrid
+          pins={pins}
+          showDeleteButton={isOwnProfile}
+          onDeleteClick={handleDeletePin}
+        />
       ) : boards.length === 0 ? (
         <p className="text-secondary">{t("no_boards_yet")}</p>
       ) : (
