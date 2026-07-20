@@ -2,14 +2,18 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
+import { useTheme } from "../context/ThemeContext";
+import { deleteUserApi } from "../api/userApi";
 
 const Sidebar = () => {
   const { user, logout } = useAuth();
   const { t } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const [showSettings, setShowSettings] = useState(false);
   const [showAccount, setShowAccount] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Login qilinmagan bo'lsa, har qanday harakat login sahifasiga o'tkazadi
   const goProtected = (path) => {
@@ -26,21 +30,38 @@ const Sidebar = () => {
     navigate("/login");
   };
 
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm(t("confirm_delete_account"));
+    if (!confirmed) return;
+
+    try {
+      setDeleting(true);
+      await deleteUserApi(user._id);
+      logout();
+      setShowAccount(false);
+      navigate("/");
+    } catch (error) {
+      console.error("Akkauntni o'chirishda xatolik:", error);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div
-      className="d-flex flex-column align-items-center py-3 bg-white border-end position-relative"
-      style={{ width: "64px", minHeight: "100vh", position: "sticky", top: 0, zIndex: 20 }}
+      className="d-flex flex-column align-items-center py-3 sidebar-nav"
+      style={{ width: "64px", position: "fixed", top: 0, left: 0, bottom: 0, zIndex: 30 }}
     >
-      <Link to="/" className="text-danger mb-4 fs-3">
+      <Link to="/" className="text-danger mb-4 fs-3 sidebar-icon-btn">
         <i className="bi bi-pinterest"></i>
       </Link>
 
-      <Link to="/" className="text-dark mb-4 fs-5" title={t("sidebar_home")}>
+      <Link to="/" className="text-dark mb-4 fs-5 sidebar-icon-btn" title={t("sidebar_home")}>
         <i className="bi bi-house-fill"></i>
       </Link>
 
       <button
-        className="btn border-0 text-dark mb-4 fs-5"
+        className="btn border-0 text-dark mb-4 fs-5 sidebar-icon-btn"
         title={t("sidebar_boards")}
         onClick={() => goProtected("/boards")}
       >
@@ -48,7 +69,7 @@ const Sidebar = () => {
       </button>
 
       <button
-        className="btn border-0 text-dark mb-4 fs-5"
+        className="btn border-0 text-dark mb-4 fs-5 sidebar-icon-btn"
         title={t("sidebar_create")}
         onClick={() => goProtected("/pin/create")}
       >
@@ -56,11 +77,20 @@ const Sidebar = () => {
       </button>
 
       <button
-        className="btn border-0 text-dark mb-4 fs-5 position-relative"
+        className="btn border-0 text-dark mb-4 fs-5 position-relative sidebar-icon-btn"
         title={t("sidebar_chat")}
         onClick={() => goProtected("/chat")}
       >
         <i className="bi bi-chat-dots"></i>
+      </button>
+
+      {/* Kecha/kunduz (dark/light) rejimini almashtirish */}
+      <button
+        className="btn border-0 text-dark mb-4 fs-5 sidebar-icon-btn"
+        title={theme === "dark" ? t("day_mode") : t("night_mode")}
+        onClick={toggleTheme}
+      >
+        <i className={`bi ${theme === "dark" ? "bi-sun" : "bi-moon-stars"}`}></i>
       </button>
 
       <div className="flex-grow-1"></div>
@@ -133,12 +163,20 @@ const Sidebar = () => {
                 >
                   {t("log_out")}
                 </button>
+                <button
+                  className="btn btn-light w-100 text-start text-danger mt-1"
+                  onClick={handleDeleteAccount}
+                  disabled={deleting}
+                >
+                  <i className="bi bi-trash3 me-1"></i>
+                  {deleting ? t("deleting_account") : t("delete_account")}
+                </button>
               </div>
             )}
           </>
         ) : (
           <button
-            className="btn border-0 text-dark fs-5"
+            className="btn border-0 text-dark fs-5 sidebar-icon-btn"
             title={t("login_button")}
             onClick={() => navigate("/login")}
           >
@@ -150,7 +188,7 @@ const Sidebar = () => {
       {/* Sozlamalar (Settings) */}
       <div className="position-relative">
         <button
-          className="btn border-0 text-dark fs-5"
+          className="btn border-0 text-dark fs-5 sidebar-icon-btn"
           title={t("settings")}
           onClick={() => setShowSettings((v) => !v)}
         >

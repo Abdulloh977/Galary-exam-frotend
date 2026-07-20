@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "../components/Sidebar";
+import PageLayout from "../components/PageLayout";
 import { useLanguage } from "../context/LanguageContext";
 import { createPinApi } from "../api/pinApi";
 
@@ -50,10 +50,8 @@ const CreatePin = () => {
   };
 
   return (
-    <div className="d-flex">
-      <Sidebar />
-
-      <div className="flex-grow-1 p-4 d-flex justify-content-center">
+    <PageLayout>
+      <div className="d-flex justify-content-center">
         <div className="row g-4" style={{ maxWidth: "700px", width: "100%" }}>
           <h4 className="mb-3">{t("create_pin_title")}</h4>
 
@@ -132,7 +130,7 @@ const CreatePin = () => {
           </div>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 };
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import Sidebar from "../components/Sidebar";
+import PageLayout from "../components/PageLayout";
 import Loader from "../components/Loader";
 import Modal from "../components/Modal";
 import CommentList from "../components/CommentList";
@@ -8,10 +8,15 @@ import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { getOnePinApi, likePinApi } from "../api/pinApi";
 import { getPinCommentsApi } from "../api/commentApi";
-import { getProfileApi } from "../api/userApi";
-import { createBoardApi, addPinToBoardApi } from "../api/boardApi";
+import { getMyBoardsApi, createBoardApi, addPinToBoardApi } from "../api/boardApi";
+import { downloadImage } from "../utils/download";
+import { useToast } from "../context/ToastContext";
+import ShareMenu from "../components/ShareMenu";
 
 const IMAGE_BASE_URL = "http://localhost:4000/public";
+
+// Harakat tugmalari uchun umumiy uslub — balandligi kamroq, kengligi kattaroq
+const actionBtnStyle = { padding: "6px 22px", fontSize: "14px" };
 
 const PinDetail = () => {
   const { id } = useParams();
@@ -28,7 +33,7 @@ const PinDetail = () => {
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [myBoards, setMyBoards] = useState([]);
   const [newBoardTitle, setNewBoardTitle] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,7 +60,6 @@ const PinDetail = () => {
     fetchData();
   }, [id, user]);
 
-  // Har qanday himoyalangan harakatdan oldin login tekshiriladi
   const requireLogin = () => {
     if (!user) {
       navigate("/login");
@@ -78,11 +82,11 @@ const PinDetail = () => {
   const openSaveModal = async () => {
     if (requireLogin()) return;
     try {
-      const res = await getProfileApi(user._id);
+      const res = await getMyBoardsApi();
       setMyBoards(res.data.boards);
       setShowSaveModal(true);
     } catch (error) {
-      console.error("Boardlarni yuklashda xatolik:", error);
+      console.error("Kategoriyalarni yuklashda xatolik:", error);
     }
   };
 
@@ -91,7 +95,7 @@ const PinDetail = () => {
       await addPinToBoardApi({ boardId, pinId: id });
       setShowSaveModal(false);
     } catch (error) {
-      console.error("Boardga saqlashda xatolik:", error);
+      console.error("Kategoriyaga saqlashda xatolik:", error);
     }
   };
 
@@ -104,148 +108,162 @@ const PinDetail = () => {
       setNewBoardTitle("");
       setShowSaveModal(false);
     } catch (error) {
-      console.error("Board yaratishda xatolik:", error);
+      console.error("Kategoriya yaratishda xatolik:", error);
     }
   };
 
   const handleShare = () => {
     if (requireLogin()) return;
-    navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setShowShareMenu(true);
   };
 
   const handleDownloadClick = (e) => {
-    if (requireLogin()) {
-      e.preventDefault();
-    }
+    e.preventDefault();
+    if (requireLogin()) return;
+    downloadImage(`${IMAGE_BASE_URL}/${pin.imageUrl}`, pin.imageUrl || `${pin.title || "pin"}.jpg`);
   };
 
   if (loading) {
     return (
-      <div className="d-flex">
-        <Sidebar />
-        <div className="flex-grow-1">
-          <Loader />
-        </div>
-      </div>
+      <PageLayout>
+        <Loader />
+      </PageLayout>
     );
   }
 
   if (!pin) {
     return (
-      <div className="d-flex">
-        <Sidebar />
-        <div className="flex-grow-1 p-4">Not found</div>
-      </div>
+      <PageLayout>
+        <p>Not found</p>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="d-flex">
-      <Sidebar />
+    <PageLayout>
+      <div className="row g-4" style={{ maxWidth: "900px" }}>
+        {/* Rasm */}
+        <div className="col-md-6">
+          <img
+            src={`${IMAGE_BASE_URL}/${pin.imageUrl}`}
+            alt={pin.title}
+            className="w-100 rounded-4"
+            style={{ objectFit: "cover" }}
+          />
+        </div>
 
-      <div className="flex-grow-1 p-4">
-        <div className="row g-4" style={{ maxWidth: "900px" }}>
-          {/* Rasm */}
-          <div className="col-md-6">
-            <img
-              src={`${IMAGE_BASE_URL}/${pin.imageUrl}`}
-              alt={pin.title}
-              className="w-100 rounded-4"
-              style={{ objectFit: "cover" }}
-            />
-          </div>
+        {/* Ma'lumotlar */}
+        <div className="col-md-6">
+          <div className="d-flex gap-2 mb-3 flex-wrap">
+            <button
+              className={`btn ${liked ? "btn-danger" : "btn-outline-danger"} rounded-pill`}
+              style={actionBtnStyle}
+              onClick={handleLike}
+            >
+              <i className="bi bi-heart-fill me-1"></i> {likesCount}
+            </button>
 
-          {/* Ma'lumotlar */}
-          <div className="col-md-6">
-            <div className="d-flex gap-2 mb-3">
-              <button
-                className={`btn ${liked ? "btn-danger" : "btn-outline-danger"} rounded-pill`}
-                onClick={handleLike}
-              >
-                <i className="bi bi-heart-fill me-1"></i> {likesCount}
-              </button>
-
+            <div className="position-relative">
               <button
                 className="btn btn-outline-secondary rounded-pill"
+                style={actionBtnStyle}
                 onClick={handleShare}
               >
                 <i className="bi bi-share me-1"></i>
-                {copied ? t("copied") : t("share")}
+                {t("share")}
               </button>
 
-              <a
-                href={`${IMAGE_BASE_URL}/${pin.imageUrl}`}
-                download
-                className="btn btn-outline-secondary rounded-pill"
-                onClick={handleDownloadClick}
-              >
-                <i className="bi bi-download me-1"></i> {t("download")}
-              </a>
-
-              <button
-                className="btn btn-dark rounded-pill ms-auto"
-                onClick={openSaveModal}
-              >
-                <i className="bi bi-bookmark-fill me-1"></i> {t("save_pin")}
-              </button>
+              {showShareMenu && (
+                <ShareMenu
+                  url={window.location.href}
+                  title={pin.title}
+                  onClose={() => setShowShareMenu(false)}
+                  style={{ left: 0, top: "44px" }}
+                />
+              )}
             </div>
 
-            <h4>{pin.title}</h4>
-            <p className="text-secondary">{pin.description}</p>
-
-            <div className="d-flex gap-3 text-secondary small mb-3">
-              <span>
-                <i className="bi bi-eye me-1"></i> {pin.views} {t("views")}
-              </span>
-              <span>
-                <i className="bi bi-heart me-1"></i> {likesCount} {t("likes")}
-              </span>
-            </div>
-
-            {pin.tags && pin.tags.length > 0 && (
-              <div className="d-flex gap-2 flex-wrap mb-3">
-                {pin.tags.map((tag) => (
-                  <span key={tag} className="badge bg-light text-dark border">
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            <Link
-              to={`/profile/${pin.owner._id}`}
-              className="d-flex align-items-center gap-2 text-decoration-none text-dark mb-3"
+            <button
+              className="btn btn-outline-secondary rounded-pill"
+              style={actionBtnStyle}
+              onClick={handleDownloadClick}
             >
-              <div
-                className="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white overflow-hidden flex-shrink-0"
-                style={{ width: "36px", height: "36px" }}
-              >
-                {pin.owner.profilePicture ? (
-                  <img
-                    src={`${IMAGE_BASE_URL}/${pin.owner.profilePicture}`}
-                    alt="avatar"
-                    className="w-100 h-100"
-                    style={{ objectFit: "cover" }}
-                  />
-                ) : (
-                  pin.owner.firstname ? pin.owner.firstname[0].toUpperCase() : "U"
-                )}
-              </div>
-              <span className="small fw-medium">
-                {pin.owner.firstname} {pin.owner.lastname}
-              </span>
-            </Link>
+              <i className="bi bi-download me-1"></i> {t("download")}
+            </button>
 
-            <CommentList
-              pinId={pin._id}
-              comments={comments}
-              onCommentAdded={(newComment) =>
-                setComments((prev) => [...prev, { ...newComment, user }])
-              }
-            />
+            <button
+              className="btn btn-dark rounded-pill ms-auto"
+              style={actionBtnStyle}
+              onClick={openSaveModal}
+            >
+              <i className="bi bi-bookmark-fill me-1"></i> {t("save_pin")}
+            </button>
           </div>
+
+          <h4>{pin.title}</h4>
+          <p className="text-secondary">{pin.description}</p>
+
+          <div className="d-flex gap-3 text-secondary small mb-3">
+            <span>
+              <i className="bi bi-eye me-1"></i> {pin.views} {t("views")}
+            </span>
+            <span>
+              <i className="bi bi-heart me-1"></i> {likesCount} {t("likes")}
+            </span>
+          </div>
+
+          {pin.tags && pin.tags.length > 0 && (
+            <div className="d-flex gap-2 flex-wrap mb-3">
+              {pin.tags.map((tag) => (
+                <span key={tag} className="badge bg-light text-dark border">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <Link
+            to={`/profile/${pin.owner._id}`}
+            className="d-flex align-items-center gap-2 text-decoration-none text-dark mb-3"
+          >
+            <div
+              className="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white overflow-hidden flex-shrink-0"
+              style={{ width: "36px", height: "36px" }}
+            >
+              {pin.owner.profilePicture ? (
+                <img
+                  src={`${IMAGE_BASE_URL}/${pin.owner.profilePicture}`}
+                  alt="avatar"
+                  className="w-100 h-100"
+                  style={{ objectFit: "cover" }}
+                />
+              ) : (
+                pin.owner.firstname ? pin.owner.firstname[0].toUpperCase() : "U"
+              )}
+            </div>
+            <span className="small fw-medium">
+              {pin.owner.firstname} {pin.owner.lastname}
+            </span>
+          </Link>
+
+          <CommentList
+            pinId={pin._id}
+            pinOwnerId={pin.owner._id}
+            comments={comments}
+            onCommentAdded={(newComment) =>
+              setComments((prev) => [...prev, newComment])
+            }
+            onCommentDeleted={(commentId) =>
+              setComments((prev) =>
+                prev.filter((c) => c._id !== commentId && c.parentComment !== commentId)
+              )
+            }
+            onCommentUpdated={(updatedComment) =>
+              setComments((prev) =>
+                prev.map((c) => (c._id === updatedComment._id ? updatedComment : c))
+              )
+            }
+          />
         </div>
       </div>
 
@@ -284,7 +302,7 @@ const PinDetail = () => {
           </form>
         </Modal>
       )}
-    </div>
+    </PageLayout>
   );
 };
 

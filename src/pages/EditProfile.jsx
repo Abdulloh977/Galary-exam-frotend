@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "../components/Sidebar";
+import PageLayout from "../components/PageLayout";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { updateProfileApi } from "../api/userApi";
@@ -53,10 +53,8 @@ const EditProfile = () => {
   };
 
   return (
-    <div className="d-flex">
-      <Sidebar />
-
-      <div className="flex-grow-1 p-4 d-flex justify-content-center">
+    <PageLayout>
+      <div className="d-flex justify-content-center">
         <div style={{ maxWidth: "500px", width: "100%" }}>
           <h4 className="mb-4">{t("edit_profile")}</h4>
 
@@ -144,7 +142,7 @@ const EditProfile = () => {
           </form>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 };
 

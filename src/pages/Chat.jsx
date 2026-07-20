@@ -195,7 +195,7 @@ const Chat = () => {
     return (
       <div className="d-flex">
         <Sidebar />
-        <div className="flex-grow-1">
+        <div className="flex-grow-1" style={{ marginLeft: "64px" }}>
           <Loader />
         </div>
       </div>
@@ -206,7 +206,7 @@ const Chat = () => {
     <div className="d-flex">
       <Sidebar />
 
-      <div className="d-flex flex-grow-1" style={{ height: "100vh" }}>
+      <div className="d-flex flex-grow-1" style={{ height: "100vh", marginLeft: "64px" }}>
         {/* Chap panel — qidiruv + kontaktlar */}
         <div
           className="border-end d-flex flex-column"

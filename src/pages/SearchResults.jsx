@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import Sidebar from "../components/Sidebar";
+import PageLayout from "../components/PageLayout";
 import SearchBar from "../components/SearchBar";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import MasonryGrid from "../components/MasonryGrid";
@@ -34,22 +34,20 @@ const SearchResults = () => {
   }, [query]);
 
   return (
-    <div className="d-flex">
-      <Sidebar />
-
-      <div className="flex-grow-1 p-4">
-        <div className="d-flex align-items-center gap-3 mb-4">
+    <PageLayout
+      topBar={
+        <div className="d-flex align-items-center gap-3">
           <SearchBar />
           <LanguageSwitcher />
         </div>
+      }
+    >
+      <h5 className="mb-3">
+        {t("search_results_for")} "{query}" {!loading && `(${pins.length})`}
+      </h5>
 
-        <h5 className="mb-3">
-          {t("search_results_for")} "{query}" {!loading && `(${pins.length})`}
-        </h5>
-
-        {loading ? <Loader /> : <MasonryGrid pins={pins} />}
-      </div>
-    </div>
+      {loading ? <Loader /> : <MasonryGrid pins={pins} />}
+    </PageLayout>
   );
 };
 

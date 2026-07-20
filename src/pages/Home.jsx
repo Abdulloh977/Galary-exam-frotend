@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Sidebar from "../components/Sidebar";
+import PageLayout from "../components/PageLayout";
 import SearchBar from "../components/SearchBar";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import TopPopularSection from "../components/TopPopularSection";
@@ -17,7 +17,6 @@ const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Ikkala so'rovni bir vaqtda yuboramiz — tezroq yuklanishi uchun
         const [allRes, topRes] = await Promise.all([
           getAllPinsApi(),
           getTopPinsApi(),
@@ -35,31 +34,29 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="d-flex">
-      <Sidebar />
-
-      <div className="flex-grow-1 p-4">
-        <div className="d-flex align-items-center gap-3 mb-4">
+    <PageLayout
+      topBar={
+        <div className="d-flex align-items-center gap-3">
           <SearchBar />
           <LanguageSwitcher />
         </div>
+      }
+    >
+      {loading ? (
+        <Loader />
+      ) : (
+        <>
+          <TopPopularSection pins={topPins} />
 
-        {loading ? (
-          <Loader />
-        ) : (
-          <>
-            <TopPopularSection pins={topPins} />
+          <div className="d-flex align-items-center gap-2 mb-3">
+            <i className="bi bi-grid text-secondary fs-5"></i>
+            <h2 className="fs-5 fw-medium mb-0">{t("all_images")}</h2>
+          </div>
 
-            <div className="d-flex align-items-center gap-2 mb-3">
-              <i className="bi bi-grid text-secondary fs-5"></i>
-              <h2 className="fs-5 fw-medium mb-0">{t("all_images")}</h2>
-            </div>
-
-            <MasonryGrid pins={allPins} />
-          </>
-        )}
-      </div>
-    </div>
+          <MasonryGrid pins={allPins} />
+        </>
+      )}
+    </PageLayout>
   );
 };
 
