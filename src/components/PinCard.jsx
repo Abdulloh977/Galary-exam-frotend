@@ -84,7 +84,7 @@ const PinCard = ({ pin, showDeleteButton, onDeleteClick }) => {
           </span>
           <span className="d-flex align-items-center gap-1 text-secondary small" title={t("likes")}>
             <i className="bi bi-heart"></i>
-            {pin.likes ? pin.likes.length : 0}
+            {pin.likesCount ?? (pin.likes ? pin.likes.length : 0)}
           </span>
 
           <div className="position-relative">
