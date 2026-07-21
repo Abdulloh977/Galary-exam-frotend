@@ -3,9 +3,9 @@ import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { useNavigate } from "react-router-dom";
 import CommentItem from "./CommentItem";
-import { createCommentApi, deleteCommentApi } from "../api/commentApi";
+import { createCommentApi, deleteCommentApi, updateCommentApi } from "../api/commentApi";
 
-const CommentList = ({ pinId, pinOwnerId, comments, onCommentAdded, onCommentDeleted }) => {
+const CommentList = ({ pinId, pinOwnerId, comments, onCommentAdded, onCommentDeleted, onCommentUpdated }) => {
   const { user } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -29,6 +29,12 @@ const CommentList = ({ pinId, pinOwnerId, comments, onCommentAdded, onCommentDel
     const isPinOwner = pinOwnerId === user._id;
     const isAdmin = user.role === 102;
     return isCommentOwner || isPinOwner || isAdmin;
+  };
+
+  // Tahrirlash faqat izohning o'z egasiga tegishli — pin egasi boshqalarning izohini tahrirlay olmaydi
+  const canEdit = (comment) => {
+    if (!user) return false;
+    return comment.user?._id === user._id;
   };
 
   const handleSubmit = async (e) => {
@@ -76,6 +82,15 @@ const CommentList = ({ pinId, pinOwnerId, comments, onCommentAdded, onCommentDel
     }
   };
 
+  const handleEdit = async (commentId, newText) => {
+    try {
+      const res = await updateCommentApi(commentId, newText);
+      onCommentUpdated(res.data.comment);
+    } catch (error) {
+      console.error("Izohni tahrirlashda xatolik:", error);
+    }
+  };
+
   // Faqat asosiy (parentComment=null) izohlar va ularga tegishli javoblar
   const topLevelComments = comments.filter((c) => !c.parentComment);
   const getReplies = (parentId) =>
@@ -95,7 +110,9 @@ const CommentList = ({ pinId, pinOwnerId, comments, onCommentAdded, onCommentDel
             <CommentItem
               comment={c}
               canDelete={canDelete(c)}
+              canEdit={canEdit(c)}
               onDelete={handleDelete}
+              onEdit={handleEdit}
               onReplyClick={(id) => setReplyingTo(id === replyingTo ? null : id)}
             />
 
@@ -123,7 +140,9 @@ const CommentList = ({ pinId, pinOwnerId, comments, onCommentAdded, onCommentDel
                 key={reply._id}
                 comment={reply}
                 canDelete={canDelete(reply)}
+                canEdit={canEdit(reply)}
                 onDelete={handleDelete}
+                onEdit={handleEdit}
                 isReply
               />
             ))}

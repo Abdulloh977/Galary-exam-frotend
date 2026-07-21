@@ -2,3 +2,221 @@ body {
   margin: 0;
   font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
 }
+
+:root {
+  --accent: #e60023;
+  --accent-soft: rgba(230, 0, 35, 0.08);
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar-nav {
+  background: linear-gradient(180deg, #ffffff 0%, #fff6f6 55%, #ffffff 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 1px 0 0 rgba(0, 0, 0, 0.06), 6px 0 24px -12px rgba(230, 0, 35, 0.18);
+}
+
+.sidebar-icon-btn {
+  position: relative;
+  z-index: 1;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease;
+}
+.sidebar-icon-btn::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  background: var(--accent-soft);
+  border-radius: 50%;
+  transform: scale(0);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: -1;
+}
+.sidebar-icon-btn:hover {
+  color: var(--accent) !important;
+  transform: translateY(-2px) scale(1.08);
+}
+.sidebar-icon-btn:hover::before {
+  transform: scale(1);
+}
+.sidebar-icon-btn:active {
+  transform: scale(0.9);
+}
+
+/* ---------- Search bar ---------- */
+.search-glass {
+  background: linear-gradient(135deg, #f4f5f7, #ffffff);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+}
+.search-glass:focus-within {
+  background: #ffffff;
+  border-color: rgba(230, 0, 35, 0.35);
+  box-shadow: 0 0 0 4px var(--accent-soft), 0 8px 20px -10px rgba(0, 0, 0, 0.2);
+}
+.search-glass i {
+  transition: color 0.25s ease, transform 0.25s ease;
+}
+.search-glass:focus-within i {
+  color: var(--accent) !important;
+  transform: scale(1.1);
+}
+
+/* ---------- Global button micro-interactions ---------- */
+.btn {
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.18s ease, background-color 0.18s ease, color 0.18s ease !important;
+}
+.btn:hover {
+  transform: translateY(-1px);
+}
+.btn:active {
+  transform: scale(0.94);
+}
+.btn-danger:hover {
+  box-shadow: 0 6px 16px -6px rgba(230, 0, 35, 0.5);
+}
+
+/* ---------- Pin image hover zoom (Pinterest-style) ---------- */
+.pin-image-wrap {
+  overflow: hidden;
+}
+.pin-image-wrap img {
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), filter 0.3s ease;
+}
+.pin-image-wrap:hover img {
+  transform: scale(1.06);
+  filter: brightness(0.94);
+}
+
+/* ---------- Toast notification ---------- */
+.toast-pop {
+  animation: toastPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes toastPop {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .sidebar-icon-btn,
+  .sidebar-icon-btn::before,
+  .search-glass,
+  .search-glass i,
+  .pin-image-wrap img {
+    transition: none !important;
+  }
+}
+
+/* ---------- Dark mode (kecha rejimi) ---------- */
+body.dark-mode {
+  background-color: #121212;
+  color: #e8e8e8;
+}
+body.dark-mode .bg-white,
+body.dark-mode .bg-light {
+  background-color: #1e1e1e !important;
+  color: #e8e8e8;
+}
+body.dark-mode .text-dark,
+body.dark-mode .text-body,
+body.dark-mode .text-black,
+body.dark-mode p,
+body.dark-mode span,
+body.dark-mode label,
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6,
+body.dark-mode small,
+body.dark-mode i,
+body.dark-mode a:not(.btn) {
+  color: #e8e8e8 !important;
+}
+body.dark-mode .text-secondary,
+body.dark-mode .text-muted {
+  color: #e8e8e8 !important;
+}
+body.dark-mode .border,
+body.dark-mode .border-end,
+body.dark-mode .border-bottom,
+body.dark-mode .border-top,
+body.dark-mode hr {
+  border-color: #333 !important;
+}
+
+/* Sidebar — oddiy, silliq qora fon (qizg'ish gradientsiz) */
+body.dark-mode .sidebar-nav {
+  background: #161616;
+  box-shadow: 1px 0 0 rgba(255, 255, 255, 0.06);
+}
+
+body.dark-mode .search-glass {
+  background: #1e1e1e;
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #e8e8e8;
+}
+body.dark-mode .search-glass input {
+  color: #e8e8e8;
+  background: transparent;
+}
+body.dark-mode .search-glass input::placeholder {
+  color: #999;
+}
+body.dark-mode .form-control {
+  background-color: #1e1e1e;
+  color: #e8e8e8;
+  border-color: #333;
+}
+body.dark-mode .form-control::placeholder {
+  color: #888;
+}
+body.dark-mode .form-control:focus {
+  background-color: #1e1e1e;
+  color: #e8e8e8;
+}
+body.dark-mode .modal-content,
+body.dark-mode .shadow,
+body.dark-mode .shadow-sm {
+  background-color: #1e1e1e;
+  color: #e8e8e8;
+}
+
+/* Plain (variantsiz) tugmalar — masalan "..." menyusidagi Copy link/Download/Share —
+   Bootstrap ularning matn rangini har doim to'q qilib belgilaydi, shuning uchun
+   dark rejimda alohida oq rangga majburlaymiz (qizil/kulrang variantlar bundan mustasno) */
+body.dark-mode .btn:not(.btn-danger):not(.btn-outline-danger):not(.text-danger):not(.btn-dark):not(.text-secondary) {
+  color: #e8e8e8 !important;
+}
+body.dark-mode .btn-light {
+  background-color: #2a2a2a !important;
+  color: #e8e8e8 !important;
+  border-color: #333 !important;
+}
+body.dark-mode .btn-outline-dark {
+  color: #e8e8e8 !important;
+  border-color: #444 !important;
+}
+body.dark-mode .btn-outline-secondary {
+  color: #e8e8e8 !important;
+  border-color: #555 !important;
+}
+body.dark-mode .badge.bg-light {
+  background-color: #2a2a2a !important;
+  color: #e8e8e8 !important;
+}
+body.dark-mode .dropdown-menu {
+  background-color: #1e1e1e;
+  color: #e8e8e8;
+}
+body.dark-mode ::placeholder {
+  color: #999 !important;
+}

@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
+import TopBar from "../components/TopBar";
 import Loader from "../components/Loader";
 import MasonryGrid from "../components/MasonryGrid";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
-import { getProfileApi } from "../api/userApi";
+import { getProfileApi, updateProfileApi } from "../api/userApi";
+import { deletePinApi } from "../api/pinApi";
 
 const Profile = () => {
   const { id } = useParams();
@@ -19,6 +21,7 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState("pins");
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const isOwnProfile = currentUser && currentUser._id === id;
 
@@ -54,9 +57,39 @@ const Profile = () => {
     navigate(`/chat/${id}`);
   };
 
+  const handleDeletePin = async (pinId) => {
+    const confirmed = window.confirm(t("confirm_delete_pin"));
+    if (!confirmed) return;
+
+    try {
+      await deletePinApi(pinId);
+      setPins((prev) => prev.filter((p) => p._id !== pinId));
+    } catch (error) {
+      console.error("Rasmni o'chirishda xatolik:", error);
+    }
+  };
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      setUploadingAvatar(true);
+      const formData = new FormData();
+      formData.append("profilePicture", file);
+      const res = await updateProfileApi(id, formData);
+      setProfileUser(res.data.user);
+    } catch (error) {
+      console.error("Avatar yangilashda xatolik:", error);
+    } finally {
+      setUploadingAvatar(false);
+      e.target.value = "";
+    }
+  };
+
   if (loading) {
     return (
-      <PageLayout>
+      <PageLayout topBar={<TopBar />}>
         <Loader />
       </PageLayout>
     );
@@ -64,29 +97,65 @@ const Profile = () => {
 
   if (!profileUser) {
     return (
-      <PageLayout>
+      <PageLayout topBar={<TopBar />}>
         <p>Not found</p>
       </PageLayout>
     );
   }
 
   return (
-    <PageLayout>
+    <PageLayout topBar={<TopBar />}>
       <div className="d-flex justify-content-between align-items-start mb-4">
         <div>
-          <div
-            className="rounded-circle bg-success d-flex align-items-center justify-content-center text-white mb-2 overflow-hidden"
-            style={{ width: "64px", height: "64px", fontSize: "24px" }}
-          >
-            {profileUser.profilePicture ? (
-              <img
-                src={`http://localhost:4000/public/${profileUser.profilePicture}`}
-                alt="avatar"
-                className="w-100 h-100"
-                style={{ objectFit: "cover" }}
-              />
-            ) : (
-              profileUser.firstname ? profileUser.firstname[0].toUpperCase() : "U"
+          <div className="position-relative d-inline-block mb-2" style={{ width: "64px", height: "64px" }}>
+            <div
+              className="rounded-circle bg-success d-flex align-items-center justify-content-center text-white overflow-hidden w-100 h-100"
+              style={{ fontSize: "24px" }}
+            >
+              {profileUser.profilePicture ? (
+                <img
+                  src={`http://localhost:4000/public/${profileUser.profilePicture}`}
+                  alt="avatar"
+                  className="w-100 h-100"
+                  style={{ objectFit: "cover" }}
+                />
+              ) : (
+                profileUser.firstname ? profileUser.firstname[0].toUpperCase() : "U"
+              )}
+            </div>
+
+            {isOwnProfile && (
+              <>
+                <label
+                  htmlFor="avatarUploadInput"
+                  className="d-flex align-items-center justify-content-center rounded-circle position-absolute"
+                  style={{
+                    width: "26px",
+                    height: "26px",
+                    bottom: 0,
+                    right: 0,
+                    backgroundColor: "#000",
+                    color: "#fff",
+                    cursor: "pointer",
+                    border: "2px solid #fff",
+                    fontSize: "12px",
+                  }}
+                  title={t("edit_profile")}
+                >
+                  {uploadingAvatar ? (
+                    <span className="spinner-border spinner-border-sm" style={{ width: "12px", height: "12px" }}></span>
+                  ) : (
+                    <i className="bi bi-camera-fill"></i>
+                  )}
+                </label>
+                <input
+                  id="avatarUploadInput"
+                  type="file"
+                  accept="image/*"
+                  className="d-none"
+                  onChange={handleAvatarChange}
+                />
+              </>
             )}
           </div>
           <h3 className="mb-1">
@@ -139,7 +208,11 @@ const Profile = () => {
       </div>
 
       {activeTab === "pins" ? (
-        <MasonryGrid pins={pins} />
+        <MasonryGrid
+          pins={pins}
+          showDeleteButton={isOwnProfile}
+          onDeleteClick={handleDeletePin}
+        />
       ) : boards.length === 0 ? (
         <p className="text-secondary">{t("no_boards_yet")}</p>
       ) : (

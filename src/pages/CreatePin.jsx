@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
+import TopBar from "../components/TopBar";
 import { useLanguage } from "../context/LanguageContext";
 import { createPinApi } from "../api/pinApi";
 
@@ -50,7 +51,7 @@ const CreatePin = () => {
   };
 
   return (
-    <PageLayout>
+    <PageLayout topBar={<TopBar />}>
       <div className="d-flex justify-content-center">
         <div className="row g-4" style={{ maxWidth: "700px", width: "100%" }}>
           <h4 className="mb-3">{t("create_pin_title")}</h4>

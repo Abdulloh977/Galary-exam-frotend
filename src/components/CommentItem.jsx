@@ -1,15 +1,30 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 
 const IMAGE_BASE_URL = "http://localhost:4000/public";
 
-const CommentItem = ({ comment, canDelete, onDelete, onReplyClick, isReply }) => {
+const CommentItem = ({ comment, canDelete, canEdit, onDelete, onEdit, onReplyClick, isReply }) => {
   const { t } = useLanguage();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(comment.text);
 
   const authorName = comment.user
     ? `${comment.user.firstname || ""} ${comment.user.lastname || ""}`.trim() ||
       comment.user.username
     : "User";
+
+  const handleSaveEdit = (e) => {
+    e.preventDefault();
+    if (editText.trim() === "") return;
+    onEdit(comment._id, editText.trim());
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditText(comment.text);
+    setIsEditing(false);
+  };
 
   return (
     <div className={`d-flex gap-2 mb-3 ${isReply ? "ms-4" : ""}`}>
@@ -37,25 +52,60 @@ const CommentItem = ({ comment, canDelete, onDelete, onReplyClick, isReply }) =>
         >
           {authorName}
         </Link>
-        <p className="mb-1 small text-secondary">{comment.text}</p>
-        <div className="d-flex gap-3">
-          {!isReply && (
-            <button
-              className="btn btn-link btn-sm p-0 text-secondary small text-decoration-none"
-              onClick={() => onReplyClick(comment._id)}
-            >
-              {t("reply")}
+
+        {isEditing ? (
+          <form onSubmit={handleSaveEdit} className="d-flex gap-2 mb-1">
+            <input
+              type="text"
+              className="form-control form-control-sm"
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              placeholder={t("edit_comment_placeholder")}
+              autoFocus
+            />
+            <button className="btn btn-dark btn-sm" type="submit">
+              {t("save")}
             </button>
-          )}
-          {canDelete && (
             <button
-              className="btn btn-link btn-sm p-0 text-danger small text-decoration-none"
-              onClick={() => onDelete(comment._id)}
+              type="button"
+              className="btn btn-light btn-sm"
+              onClick={handleCancelEdit}
             >
-              {t("delete")}
+              {t("cancel")}
             </button>
-          )}
-        </div>
+          </form>
+        ) : (
+          <p className="mb-1 small text-secondary">{comment.text}</p>
+        )}
+
+        {!isEditing && (
+          <div className="d-flex gap-3">
+            {!isReply && (
+              <button
+                className="btn btn-link btn-sm p-0 text-secondary small text-decoration-none"
+                onClick={() => onReplyClick(comment._id)}
+              >
+                {t("reply")}
+              </button>
+            )}
+            {canEdit && (
+              <button
+                className="btn btn-link btn-sm p-0 text-secondary small text-decoration-none"
+                onClick={() => setIsEditing(true)}
+              >
+                {t("edit")}
+              </button>
+            )}
+            {canDelete && (
+              <button
+                className="btn btn-link btn-sm p-0 text-danger small text-decoration-none"
+                onClick={() => onDelete(comment._id)}
+              >
+                {t("delete")}
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
