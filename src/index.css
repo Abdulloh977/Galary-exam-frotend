@@ -145,6 +145,7 @@ body.dark-mode .text-secondary,
 body.dark-mode .text-muted {
   color: #e8e8e8 !important;
 }
+<<<<<<< HEAD
 
 /* Sidebar va pin kartochkalaridagi barcha ikonka/matnlarni majburiy oq qilish
    (ba'zan bootstrap-icons currentColor merosxo'rligi yetarli bo'lmasligi mumkin edi) */
@@ -156,6 +157,8 @@ body.dark-mode [class^="bi-"],
 body.dark-mode [class*=" bi-"] {
   color: #e8e8e8 !important;
 }
+=======
+>>>>>>> 0cab880aa4c979105ddc94ba81b724e84bc716b2
 body.dark-mode .border,
 body.dark-mode .border-end,
 body.dark-mode .border-bottom,

@@ -13,6 +13,9 @@ const Home = () => {
   const [topPins, setTopPins] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Standart holatda menyu yopiq turadi
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -34,7 +37,18 @@ const Home = () => {
 
   return (
     <PageLayout
+<<<<<<< HEAD
       topBar={<TopBar />}
+=======
+      isSidebarOpen={isSidebarOpen}
+      onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} // <-- BU QATOR MASONRY VA SIDEBAR UCHUN JUDA MUHIM!
+      topBar={
+        <TopBar 
+          isSidebarOpen={isSidebarOpen} 
+          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
+        />
+      }
+>>>>>>> 0cab880aa4c979105ddc94ba81b724e84bc716b2
     >
       {loading ? (
         <Loader />
