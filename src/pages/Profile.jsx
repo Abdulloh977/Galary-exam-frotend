@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
-import TopBar from "../components/TopBar";
 import Loader from "../components/Loader";
 import MasonryGrid from "../components/MasonryGrid";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
-import { getProfileApi, updateProfileApi } from "../api/userApi";
-import { deletePinApi } from "../api/pinApi";
+import { getProfileApi } from "../api/userApi";
+import { deletePinApi, updatePinApi } from "../api/pinApi"; // 1. API IMPORT QILINDI (agar ismi boshqacha bo'lsa to'g'rilang)
 
 const Profile = () => {
   const { id } = useParams();
@@ -21,7 +20,6 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState("pins");
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const isOwnProfile = currentUser && currentUser._id === id;
 
@@ -69,27 +67,26 @@ const Profile = () => {
     }
   };
 
-  const handleAvatarChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
+  // ASOSIY YANGILIK: Checkbox bosilganda API'ga so'rov yuborish va frontend state'ni o'zgartirish
+  const handleTogglePrivacy = async (pinId, isChecked) => {
     try {
-      setUploadingAvatar(true);
-      const formData = new FormData();
-      formData.append("profilePicture", file);
-      const res = await updateProfileApi(id, formData);
-      setProfileUser(res.data.user);
+      // Backend'ga yangi holatni yuboramiz (isPrivate: true/false)
+      await updatePinApi(pinId, { isPrivate: isChecked });
+
+      // State'ni darhol yangilaymiz, sahifa refresh bo'lishi shart emas
+      setPins((prevPins) =>
+        prevPins.map((pin) =>
+          pin._id === pinId ? { ...pin, isPrivate: isChecked } : pin
+        )
+      );
     } catch (error) {
-      console.error("Avatar yangilashda xatolik:", error);
-    } finally {
-      setUploadingAvatar(false);
-      e.target.value = "";
+      console.error("Rasm maxfiylik holatini o'zgartirishda xatolik:", error);
     }
   };
 
   if (loading) {
     return (
-      <PageLayout topBar={<TopBar />}>
+      <PageLayout>
         <Loader />
       </PageLayout>
     );
@@ -97,65 +94,29 @@ const Profile = () => {
 
   if (!profileUser) {
     return (
-      <PageLayout topBar={<TopBar />}>
+      <PageLayout>
         <p>Not found</p>
       </PageLayout>
     );
   }
 
   return (
-    <PageLayout topBar={<TopBar />}>
+    <PageLayout>
       <div className="d-flex justify-content-between align-items-start mb-4">
         <div>
-          <div className="position-relative d-inline-block mb-2" style={{ width: "64px", height: "64px" }}>
-            <div
-              className="rounded-circle bg-success d-flex align-items-center justify-content-center text-white overflow-hidden w-100 h-100"
-              style={{ fontSize: "24px" }}
-            >
-              {profileUser.profilePicture ? (
-                <img
-                  src={`http://localhost:4000/public/${profileUser.profilePicture}`}
-                  alt="avatar"
-                  className="w-100 h-100"
-                  style={{ objectFit: "cover" }}
-                />
-              ) : (
-                profileUser.firstname ? profileUser.firstname[0].toUpperCase() : "U"
-              )}
-            </div>
-
-            {isOwnProfile && (
-              <>
-                <label
-                  htmlFor="avatarUploadInput"
-                  className="d-flex align-items-center justify-content-center rounded-circle position-absolute"
-                  style={{
-                    width: "26px",
-                    height: "26px",
-                    bottom: 0,
-                    right: 0,
-                    backgroundColor: "#000",
-                    color: "#fff",
-                    cursor: "pointer",
-                    border: "2px solid #fff",
-                    fontSize: "12px",
-                  }}
-                  title={t("edit_profile")}
-                >
-                  {uploadingAvatar ? (
-                    <span className="spinner-border spinner-border-sm" style={{ width: "12px", height: "12px" }}></span>
-                  ) : (
-                    <i className="bi bi-camera-fill"></i>
-                  )}
-                </label>
-                <input
-                  id="avatarUploadInput"
-                  type="file"
-                  accept="image/*"
-                  className="d-none"
-                  onChange={handleAvatarChange}
-                />
-              </>
+          <div
+            className="rounded-circle bg-success d-flex align-items-center justify-content-center text-white mb-2 overflow-hidden"
+            style={{ width: "64px", height: "64px", fontSize: "24px" }}
+          >
+            {profileUser.profilePicture ? (
+              <img
+                src={`http://localhost:4000/public/${profileUser.profilePicture}`}
+                alt="avatar"
+                className="w-100 h-100"
+                style={{ objectFit: "cover" }}
+              />
+            ) : (
+              profileUser.firstname ? profileUser.firstname[0].toUpperCase() : "U"
             )}
           </div>
           <h3 className="mb-1">
@@ -207,11 +168,13 @@ const Profile = () => {
         </button>
       </div>
 
+      {/* YANGILANDI: MasonryGrid ichiga yangi funksiyamiz uzatildi */}
       {activeTab === "pins" ? (
         <MasonryGrid
           pins={pins}
           showDeleteButton={isOwnProfile}
           onDeleteClick={handleDeletePin}
+          onTogglePrivacy={handleTogglePrivacy} // <-- QO'SHILDI
         />
       ) : boards.length === 0 ? (
         <p className="text-secondary">{t("no_boards_yet")}</p>
@@ -237,3 +200,4 @@ const Profile = () => {
 };
 
 export default Profile;
+

@@ -18,3 +18,6 @@ export const getOnePinApi = (id) => axiosInstance.get(`/pin/one/${id}`);
 export const likePinApi = (id) => axiosInstance.put(`/pin/like/${id}`);
 
 export const deletePinApi = (id) => axiosInstance.delete(`/pin/delete/${id}`);
+
+export const updatePinApi = (id, data) => axiosInstance.put(`/pin/update/${id}`, data);
+

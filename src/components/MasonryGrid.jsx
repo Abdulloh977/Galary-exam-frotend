@@ -10,12 +10,7 @@ const getColumnCount = (width) => {
   return 6;
 };
 
-// Haqiqiy ustunli (flex) masonry — CSS "columns" xususiyati ishlatilmaydi.
-// CSS multi-column'da har bir ustun alohida "clip" konteksti hosil qilib,
-// kartaning "..." menyusi qo'shni ustun chegarasida kesilib/yashirinib qolishi
-// mumkin edi. Endi har bir ustun — oddiy flex konteyner, shuning uchun
-// dropdown menyular hech qanday qo'shni elementga xalaqit bermaydi.
-const MasonryGrid = ({ pins, showDeleteButton, onDeleteClick }) => {
+const MasonryGrid = ({ pins, showDeleteButton, onDeleteClick, onTogglePrivacy }) => {
   const { t } = useLanguage();
   const [columnCount, setColumnCount] = useState(
     typeof window !== "undefined" ? getColumnCount(window.innerWidth) : 5
@@ -50,6 +45,7 @@ const MasonryGrid = ({ pins, showDeleteButton, onDeleteClick }) => {
               pin={pin}
               showDeleteButton={showDeleteButton}
               onDeleteClick={onDeleteClick}
+              onTogglePrivacy={onTogglePrivacy}
             />
           ))}
         </div>

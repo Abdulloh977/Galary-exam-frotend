@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { createPortal } from "react-dom"; // Portal orqali modallarni bodyga chiqarish uchun
+import { createPortal } from "react-dom"; 
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
-import Modal from "../components/Modal"; // O'zingizning Modal komponentingiz
+import Modal from "../components/Modal"; 
 
-const Sidebar = () => {
+// 1. BU YERDA: onToggleSidebar props qabul qilib olindi
+const Sidebar = ({ onToggleSidebar }) => {
   const { user } = useAuth();
   const { t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
@@ -20,7 +21,6 @@ const Sidebar = () => {
   const [reportText, setReportText] = useState("");
   const [reportType, setReportType] = useState("spam");
 
-  // Login qilinmagan bo'lsa, har qanday harakat login sahifasiga o'tkazadi
   const goProtected = (path) => {
     if (!user) {
       navigate("/login");
@@ -31,7 +31,7 @@ const Sidebar = () => {
 
   const openModalHandler = (modalName) => {
     setActiveModal(modalName);
-    setShowSettings(false); // Popup menyuni yopadi
+    setShowSettings(false); 
   };
 
   const handleInterestChange = (id) => {
@@ -63,10 +63,22 @@ const Sidebar = () => {
       className="d-flex flex-column align-items-center py-3 sidebar-nav"
       style={{ width: "64px", position: "fixed", top: 0, left: 0, bottom: 0, zIndex: 30 }}
     >
-      <Link to="/" className="text-danger mb-4 fs-3 sidebar-icon-btn">
+      {/* Pinterest Logotipi */}
+      <Link to="/" className="text-danger mb-2 fs-3 sidebar-icon-btn">
         <i className="bi bi-pinterest"></i>
       </Link>
 
+      {/* 2. YANGI QO'SHILDI: Chapga qaragan < tugmasi (Sidebar ochiqligida uni yopish uchun) */}
+      <button
+        className="btn btn-light rounded-circle d-flex align-items-center justify-content-center p-0 shadow-sm mb-4"
+        style={{ width: "32px", height: "32px" }}
+        onClick={onToggleSidebar}
+        type="button"
+      >
+        <i className="bi bi-chevron-left fs-6 fw-bold"></i>
+      </button>
+
+      {/* Navigatsiya tugmalari */}
       <Link to="/" className="text-dark mb-4 fs-5 sidebar-icon-btn" title={t("sidebar_home")}>
         <i className="bi bi-house-fill"></i>
       </Link>
@@ -95,7 +107,6 @@ const Sidebar = () => {
         <i className="bi bi-chat-dots"></i>
       </button>
 
-      {/* Kecha/kunduz (dark/light) rejimini almashtirish */}
       <button
         className="btn border-0 text-dark mb-4 fs-5 sidebar-icon-btn"
         title={theme === "dark" ? t("day_mode") : t("night_mode")}
@@ -116,13 +127,12 @@ const Sidebar = () => {
           <i className="bi bi-gear"></i>
         </button>
 
-        {/* BODYGA NISBATAN FIXED POPUP MENYU */}
         {showSettings && (
           <div
             className="position-fixed bg-white rounded-4 shadow-lg p-3"
             style={{ 
-              left: "74px",       // Sidebardan 10px o'ngda
-              bottom: "16px",     // Ekranning pastki qismida
+              left: "74px",       
+              bottom: "16px",     
               width: "290px", 
               zIndex: 1050,
               border: "1px solid #EFEFEF",
@@ -193,7 +203,7 @@ const Sidebar = () => {
         )}
       </div>
 
-      {/* ================= PORTAL ORQALI EKRA_N MARKAZIDA OCHILADIGAN MODALLAR ================= */}
+      {/* ================= PORTAL MODALLARI ================= */}
       {activeModal && createPortal(
         <>
           {/* 1. Tavsiyalarni sozlash Modali */}
@@ -232,7 +242,7 @@ const Sidebar = () => {
             </Modal>
           )}
 
-          {/* 2. Pinterest Modali */}
+                    {/* 2. Pinterest Modali */}
           {activeModal === "pinterest" && (
             <Modal title={t("link_pinterest")} onClose={() => setActiveModal(null)}>
               <p className="text-secondary small mb-3">Akkauntingizni rasmiy Pinterest tizimi bilan integratsiya qiling.</p>
