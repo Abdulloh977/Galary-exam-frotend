@@ -2,14 +2,15 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
+import { useTheme } from "../context/ThemeContext";
 
 const Sidebar = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { t } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const [showSettings, setShowSettings] = useState(false);
-  const [showAccount, setShowAccount] = useState(false);
 
   // Login qilinmagan bo'lsa, har qanday harakat login sahifasiga o'tkazadi
   const goProtected = (path) => {
@@ -20,27 +21,21 @@ const Sidebar = () => {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    setShowAccount(false);
-    navigate("/login");
-  };
-
   return (
     <div
-      className="d-flex flex-column align-items-center py-3 bg-white border-end"
+      className="d-flex flex-column align-items-center py-3 sidebar-nav"
       style={{ width: "64px", position: "fixed", top: 0, left: 0, bottom: 0, zIndex: 30 }}
     >
-      <Link to="/" className="text-danger mb-4 fs-3">
+      <Link to="/" className="text-danger mb-4 fs-3 sidebar-icon-btn">
         <i className="bi bi-pinterest"></i>
       </Link>
 
-      <Link to="/" className="text-dark mb-4 fs-5" title={t("sidebar_home")}>
+      <Link to="/" className="text-dark mb-4 fs-5 sidebar-icon-btn" title={t("sidebar_home")}>
         <i className="bi bi-house-fill"></i>
       </Link>
 
       <button
-        className="btn border-0 text-dark mb-4 fs-5"
+        className="btn border-0 text-dark mb-4 fs-5 sidebar-icon-btn"
         title={t("sidebar_boards")}
         onClick={() => goProtected("/boards")}
       >
@@ -48,7 +43,7 @@ const Sidebar = () => {
       </button>
 
       <button
-        className="btn border-0 text-dark mb-4 fs-5"
+        className="btn border-0 text-dark mb-4 fs-5 sidebar-icon-btn"
         title={t("sidebar_create")}
         onClick={() => goProtected("/pin/create")}
       >
@@ -56,101 +51,28 @@ const Sidebar = () => {
       </button>
 
       <button
-        className="btn border-0 text-dark mb-4 fs-5 position-relative"
+        className="btn border-0 text-dark mb-4 fs-5 position-relative sidebar-icon-btn"
         title={t("sidebar_chat")}
         onClick={() => goProtected("/chat")}
       >
         <i className="bi bi-chat-dots"></i>
       </button>
 
+      {/* Kecha/kunduz (dark/light) rejimini almashtirish */}
+      <button
+        className="btn border-0 text-dark mb-4 fs-5 sidebar-icon-btn"
+        title={theme === "dark" ? t("day_mode") : t("night_mode")}
+        onClick={toggleTheme}
+      >
+        <i className={`bi ${theme === "dark" ? "bi-sun" : "bi-moon-stars"}`}></i>
+      </button>
+
       <div className="flex-grow-1"></div>
-
-      {/* Profil avatari — bosilganda akkaunt menyusi ochiladi */}
-      <div className="position-relative mb-3">
-        {user ? (
-          <>
-            <button
-              className="btn border-0 p-0 overflow-hidden"
-              onClick={() => setShowAccount((v) => !v)}
-              title={user.firstname}
-              style={{ width: "32px", height: "32px", borderRadius: "50%" }}
-            >
-              {user.profilePicture ? (
-                <img
-                  src={`http://localhost:4000/public/${user.profilePicture}`}
-                  alt="avatar"
-                  className="w-100 h-100"
-                  style={{ objectFit: "cover" }}
-                />
-              ) : (
-                <div
-                  className="rounded-circle bg-success d-flex align-items-center justify-content-center text-white w-100 h-100"
-                  style={{ fontSize: "13px" }}
-                >
-                  {user.firstname ? user.firstname[0].toUpperCase() : "U"}
-                </div>
-              )}
-            </button>
-
-            {showAccount && (
-              <div
-                className="position-absolute bg-white rounded-3 shadow p-3"
-                style={{ left: "56px", bottom: 0, width: "220px" }}
-              >
-                <p className="text-secondary small mb-2">{t("currently_in")}</p>
-                <Link
-                  to={`/profile/${user._id}`}
-                  className="d-flex align-items-center gap-2 mb-3 text-decoration-none text-dark"
-                  onClick={() => setShowAccount(false)}
-                >
-                  <div
-                    className="rounded-circle bg-success d-flex align-items-center justify-content-center text-white overflow-hidden flex-shrink-0"
-                    style={{ width: "36px", height: "36px" }}
-                  >
-                    {user.profilePicture ? (
-                      <img
-                        src={`http://localhost:4000/public/${user.profilePicture}`}
-                        alt="avatar"
-                        className="w-100 h-100"
-                        style={{ objectFit: "cover" }}
-                      />
-                    ) : (
-                      user.firstname ? user.firstname[0].toUpperCase() : "U"
-                    )}
-                  </div>
-                  <div>
-                    <p className="mb-0 fw-medium">
-                      {user.firstname} {user.lastname}
-                    </p>
-                    <p className="mb-0 text-secondary small">{user.email}</p>
-                  </div>
-                  <i className="bi bi-check-lg ms-auto"></i>
-                </Link>
-                <hr className="my-2" />
-                <button
-                  className="btn btn-light w-100 text-start"
-                  onClick={handleLogout}
-                >
-                  {t("log_out")}
-                </button>
-              </div>
-            )}
-          </>
-        ) : (
-          <button
-            className="btn border-0 text-dark fs-5"
-            title={t("login_button")}
-            onClick={() => navigate("/login")}
-          >
-            <i className="bi bi-person-circle"></i>
-          </button>
-        )}
-      </div>
 
       {/* Sozlamalar (Settings) */}
       <div className="position-relative">
         <button
-          className="btn border-0 text-dark fs-5"
+          className="btn border-0 text-dark fs-5 sidebar-icon-btn"
           title={t("settings")}
           onClick={() => setShowSettings((v) => !v)}
         >

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
+import TopBar from "../components/TopBar";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { updateProfileApi } from "../api/userApi";
@@ -53,7 +54,7 @@ const EditProfile = () => {
   };
 
   return (
-    <PageLayout>
+    <PageLayout topBar={<TopBar />}>
       <div className="d-flex justify-content-center">
         <div style={{ maxWidth: "500px", width: "100%" }}>
           <h4 className="mb-4">{t("edit_profile")}</h4>

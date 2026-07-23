@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
+import TopBar from "../components/TopBar";
 import Loader from "../components/Loader";
 import Modal from "../components/Modal";
 import CommentList from "../components/CommentList";
@@ -9,6 +10,9 @@ import { useLanguage } from "../context/LanguageContext";
 import { getOnePinApi, likePinApi } from "../api/pinApi";
 import { getPinCommentsApi } from "../api/commentApi";
 import { getMyBoardsApi, createBoardApi, addPinToBoardApi } from "../api/boardApi";
+import { downloadImage } from "../utils/download";
+import { useToast } from "../context/ToastContext";
+import ShareMenu from "../components/ShareMenu";
 
 const IMAGE_BASE_URL = "http://localhost:4000/public";
 
@@ -30,7 +34,7 @@ const PinDetail = () => {
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [myBoards, setMyBoards] = useState([]);
   const [newBoardTitle, setNewBoardTitle] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -111,20 +115,18 @@ const PinDetail = () => {
 
   const handleShare = () => {
     if (requireLogin()) return;
-    navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setShowShareMenu(true);
   };
 
   const handleDownloadClick = (e) => {
-    if (requireLogin()) {
-      e.preventDefault();
-    }
+    e.preventDefault();
+    if (requireLogin()) return;
+    downloadImage(`${IMAGE_BASE_URL}/${pin.imageUrl}`, pin.imageUrl || `${pin.title || "pin"}.jpg`);
   };
 
   if (loading) {
     return (
-      <PageLayout>
+      <PageLayout topBar={<TopBar />}>
         <Loader />
       </PageLayout>
     );
@@ -132,14 +134,14 @@ const PinDetail = () => {
 
   if (!pin) {
     return (
-      <PageLayout>
+      <PageLayout topBar={<TopBar />}>
         <p>Not found</p>
       </PageLayout>
     );
   }
 
   return (
-    <PageLayout>
+    <PageLayout topBar={<TopBar />}>
       <div className="row g-4" style={{ maxWidth: "900px" }}>
         {/* Rasm */}
         <div className="col-md-6">
@@ -162,24 +164,33 @@ const PinDetail = () => {
               <i className="bi bi-heart-fill me-1"></i> {likesCount}
             </button>
 
-            <button
-              className="btn btn-outline-secondary rounded-pill"
-              style={actionBtnStyle}
-              onClick={handleShare}
-            >
-              <i className="bi bi-share me-1"></i>
-              {copied ? t("copied") : t("share")}
-            </button>
+            <div className="position-relative">
+              <button
+                className="btn btn-outline-secondary rounded-pill"
+                style={actionBtnStyle}
+                onClick={handleShare}
+              >
+                <i className="bi bi-share me-1"></i>
+                {t("share")}
+              </button>
 
-            <a
-              href={`${IMAGE_BASE_URL}/${pin.imageUrl}`}
-              download
+              {showShareMenu && (
+                <ShareMenu
+                  url={window.location.href}
+                  title={pin.title}
+                  onClose={() => setShowShareMenu(false)}
+                  style={{ left: 0, top: "44px" }}
+                />
+              )}
+            </div>
+
+            <button
               className="btn btn-outline-secondary rounded-pill"
               style={actionBtnStyle}
               onClick={handleDownloadClick}
             >
               <i className="bi bi-download me-1"></i> {t("download")}
-            </a>
+            </button>
 
             <button
               className="btn btn-dark rounded-pill ms-auto"
@@ -246,6 +257,11 @@ const PinDetail = () => {
             onCommentDeleted={(commentId) =>
               setComments((prev) =>
                 prev.filter((c) => c._id !== commentId && c.parentComment !== commentId)
+              )
+            }
+            onCommentUpdated={(updatedComment) =>
+              setComments((prev) =>
+                prev.map((c) => (c._id === updatedComment._id ? updatedComment : c))
               )
             }
           />

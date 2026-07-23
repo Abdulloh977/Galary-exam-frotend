@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketContext";
 import { LanguageProvider } from "./context/LanguageContext";
+import { ThemeProvider } from "./context/ThemeContext";
+import { ToastProvider } from "./context/ToastContext";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -20,6 +22,8 @@ import NotFound from "./pages/NotFound";
 
 function App() {
   return (
+    <ThemeProvider>
+    <ToastProvider>
     <LanguageProvider>
       <AuthProvider>
         <SocketProvider>
@@ -83,6 +87,8 @@ function App() {
         </SocketProvider>
       </AuthProvider>
     </LanguageProvider>
+    </ToastProvider>
+    </ThemeProvider>
   );
 }
 
