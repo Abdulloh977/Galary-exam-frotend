@@ -11,7 +11,7 @@ import { deletePinApi } from "../api/pinApi";
 
 const Profile = () => {
   const { id } = useParams();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, updateUser } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
 
@@ -79,6 +79,7 @@ const Profile = () => {
       formData.append("profilePicture", file);
       const res = await updateProfileApi(id, formData);
       setProfileUser(res.data.user);
+      updateUser(res.data.user);
     } catch (error) {
       console.error("Avatar yangilashda xatolik:", error);
     } finally {
