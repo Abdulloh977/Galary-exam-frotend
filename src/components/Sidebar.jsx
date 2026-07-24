@@ -4,15 +4,8 @@ import { createPortal } from "react-dom";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
-<<<<<<< HEAD
 
 const Sidebar = () => {
-=======
-import Modal from "../components/Modal"; 
-
-// 1. BU YERDA: onToggleSidebar props qabul qilib olindi
-const Sidebar = ({ onToggleSidebar }) => {
->>>>>>> 0cab880aa4c979105ddc94ba81b724e84bc716b2
   const { user } = useAuth();
   const { t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
@@ -34,66 +27,15 @@ const Sidebar = ({ onToggleSidebar }) => {
     }
   };
 
-<<<<<<< HEAD
-=======
-  const openModalHandler = (modalName) => {
-    setActiveModal(modalName);
-    setShowSettings(false); 
-  };
-
-  const handleInterestChange = (id) => {
-    if (selectedInterests.includes(id)) {
-      setSelectedInterests(selectedInterests.filter((item) => item !== id));
-    } else {
-      setSelectedInterests([...selectedInterests, id]);
-    }
-  };
-
-  const handleSaveRecommendations = () => {
-    alert("Tavsiyalar saqlandi!");
-    setActiveModal(null);
-  };
-
-  const handleSendReport = (e) => {
-    e.preventDefault();
-    if (!reportText.trim()) {
-      alert("Iltimos, matn kiriting!");
-      return;
-    }
-    alert("Shikoyat yuborildi!");
-    setReportText("");
-    setActiveModal(null);
-  };
-
->>>>>>> 0cab880aa4c979105ddc94ba81b724e84bc716b2
   return (
     <div
       className="d-flex flex-column align-items-center py-3 sidebar-nav"
       style={{ width: "64px", position: "fixed", top: 0, left: 0, bottom: 0, zIndex: 30 }}
     >
-<<<<<<< HEAD
       <Link to="/" className="text-danger mb-4 fs-3 sidebar-icon-btn">
         <i className="bi bi-pinterest"></i>
       </Link>
 
-=======
-      {/* Pinterest Logotipi */}
-      <Link to="/" className="text-danger mb-2 fs-3 sidebar-icon-btn">
-        <i className="bi bi-pinterest"></i>
-      </Link>
-
-      {/* 2. YANGI QO'SHILDI: Chapga qaragan < tugmasi (Sidebar ochiqligida uni yopish uchun) */}
-      <button
-        className="btn btn-light rounded-circle d-flex align-items-center justify-content-center p-0 shadow-sm mb-4"
-        style={{ width: "32px", height: "32px" }}
-        onClick={onToggleSidebar}
-        type="button"
-      >
-        <i className="bi bi-chevron-left fs-6 fw-bold"></i>
-      </button>
-
-      {/* Navigatsiya tugmalari */}
->>>>>>> 0cab880aa4c979105ddc94ba81b724e84bc716b2
       <Link to="/" className="text-dark mb-4 fs-5 sidebar-icon-btn" title={t("sidebar_home")}>
         <i className="bi bi-house-fill"></i>
       </Link>
@@ -122,10 +64,7 @@ const Sidebar = ({ onToggleSidebar }) => {
         <i className="bi bi-chat-dots"></i>
       </button>
 
-<<<<<<< HEAD
       {/* Kecha/kunduz (dark/light) rejimini almashtirish */}
-=======
->>>>>>> 0cab880aa4c979105ddc94ba81b724e84bc716b2
       <button
         className="btn border-0 text-dark mb-4 fs-5 sidebar-icon-btn"
         title={theme === "dark" ? t("day_mode") : t("night_mode")}

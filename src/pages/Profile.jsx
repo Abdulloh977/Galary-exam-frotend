@@ -79,10 +79,6 @@ const Profile = () => {
       formData.append("profilePicture", file);
       const res = await updateProfileApi(id, formData);
       setProfileUser(res.data.user);
-<<<<<<< HEAD
-=======
-      updateUser(res.data.user);
->>>>>>> 0cab880aa4c979105ddc94ba81b724e84bc716b2
     } catch (error) {
       console.error("Avatar yangilashda xatolik:", error);
     } finally {

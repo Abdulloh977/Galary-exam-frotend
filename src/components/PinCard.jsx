@@ -8,11 +8,7 @@ import ShareMenu from "./ShareMenu";
 // Rasm manzili backend'dagi /public papkasidan olinadi
 const IMAGE_BASE_URL = "http://localhost:4000/public";
 
-<<<<<<< HEAD
 const PinCard = ({ pin, showDeleteButton, onDeleteClick }) => {
-=======
-const PinCard = ({ pin, showDeleteButton, onDeleteClick, onTogglePrivacy }) => {
->>>>>>> 0cab880aa4c979105ddc94ba81b724e84bc716b2
   const { t } = useLanguage();
   const { showToast } = useToast();
   const [showMenu, setShowMenu] = useState(false);
@@ -55,17 +51,6 @@ const PinCard = ({ pin, showDeleteButton, onDeleteClick, onTogglePrivacy }) => {
     e.stopPropagation();
     setShowMenu(false);
     onDeleteClick(pin._id);
-<<<<<<< HEAD
-=======
-  };
-
-  // CHECKBOX BOSILGANDA ISHLAYDIGAN EVENT
-  const handleCheckboxChange = (e) => {
-    e.stopPropagation(); // Sahifaga o'tib ketmasligi uchun
-    if (onTogglePrivacy) {
-      onTogglePrivacy(pin._id, e.target.checked);
-    }
->>>>>>> 0cab880aa4c979105ddc94ba81b724e84bc716b2
   };
 
   return (
@@ -99,7 +84,6 @@ const PinCard = ({ pin, showDeleteButton, onDeleteClick, onTogglePrivacy }) => {
           </span>
           <span className="d-flex align-items-center gap-1 text-secondary small" title={t("likes")}>
             <i className="bi bi-heart"></i>
-<<<<<<< HEAD
             {pin.likes ? pin.likes.length : 0}
           </span>
 
@@ -111,10 +95,6 @@ const PinCard = ({ pin, showDeleteButton, onDeleteClick, onTogglePrivacy }) => {
           >
             <i className="bi bi-three-dots"></i>
           </button>
-=======
-            {pin.likesCount ?? (pin.likes ? pin.likes.length : 0)}
-          </span>
->>>>>>> 0cab880aa4c979105ddc94ba81b724e84bc716b2
 
           <div className="position-relative">
             <button
@@ -150,7 +130,6 @@ const PinCard = ({ pin, showDeleteButton, onDeleteClick, onTogglePrivacy }) => {
                     {t("copy_link")}
                   </button>
 
-<<<<<<< HEAD
                 <button
                   className="btn btn-sm w-100 text-start px-3 py-2 border-0 d-block"
                   onClick={handleDownload}
@@ -188,75 +167,6 @@ const PinCard = ({ pin, showDeleteButton, onDeleteClick, onTogglePrivacy }) => {
               style={{ right: 0, top: "20px" }}
             />
           )}
-=======
-                  <button
-                    className="btn btn-sm w-100 text-start px-3 py-2 border-0 d-block"
-                    onClick={handleDownload}
-                  >
-                    <i className="bi bi-download me-2"></i>
-                    {t("download")}
-                  </button>
-
-                  <button
-                    className="btn btn-sm w-100 text-start px-3 py-2 border-0"
-                    onClick={handleShare}
-                  >
-                    <i className="bi bi-share me-2"></i>
-                    {t("share")}
-                  </button>
-
-                  {/* ASOSIY LENTADAN YASHIRISH CHECKBOX'I - FAQAT PROFIL EGASIGA CHIQADI */}
-                  {showDeleteButton && (
-                    <>
-                      <hr className="my-1 text-black-50" />
-                      <div 
-                        className="px-3 py-2 d-flex align-items-center gap-2"
-                        onClick={(e) => e.stopPropagation()} 
-                      >
-                        <input
-                          className="form-check-input m-0"
-                          type="checkbox"
-                          id={`hide-home-${pin._id}`}
-                          style={{ cursor: "pointer", width: "16px", height: "16px" }}
-                          checked={pin.isPrivate || false}
-                          onChange={handleCheckboxChange}
-                        />
-                        <label 
-                          className="form-check-label small user-select-none text-dark mb-0" 
-                          htmlFor={`hide-home-${pin._id}`}
-                          style={{ cursor: "pointer", fontSize: "12px" }}
-                        >
-                          Lentadan yashirish
-                        </label>
-                      </div>
-                    </>
-                  )}
-
-                  {showDeleteButton && (
-                    <>
-                      <hr className="my-1 text-black-50" />
-                      <button
-                        className="btn btn-sm w-100 text-start px-3 py-2 border-0 text-danger"
-                        onClick={handleDeleteClick}
-                      >
-                        <i className="bi bi-trash3 me-2"></i>
-                        {t("delete")}
-                      </button>
-                    </>
-                  )}
-                </div>
-              </>
-            )}
-
-            {showShareMenu && (
-              <ShareMenu
-                url={pinUrl}
-                title={pin.title}
-                onClose={() => setShowShareMenu(false)}
-                style={{ right: 0, top: "20px" }}
-              />
-            )}
->>>>>>> 0cab880aa4c979105ddc94ba81b724e84bc716b2
           </div>
         </div>
       </div>
