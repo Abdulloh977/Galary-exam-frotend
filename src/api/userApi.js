@@ -13,3 +13,7 @@ export const updateProfileApi = (id, formData) =>
   });
 
 export const deleteUserApi = (id) => axiosInstance.delete(`/delete/${id}`);
+
+export const blockUserApi = (id) => axiosInstance.put(`/block/${id}`);
+
+export const unblockUserApi = (id) => axiosInstance.put(`/unblock/${id}`);

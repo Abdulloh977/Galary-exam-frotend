@@ -9,6 +9,7 @@ export const useSocket = () => useContext(SocketContext);
 export const SocketProvider = ({ children }) => {
   const { user } = useAuth();
   const [socket, setSocket] = useState(null);
+  const [onlineUsers, setOnlineUsers] = useState([]); // userId'lar ro'yxati
 
   useEffect(() => {
     if (!user) return;
@@ -21,12 +22,20 @@ export const SocketProvider = ({ children }) => {
       newSocket.emit("addUser", user._id);
     });
 
+    newSocket.on("onlineUsers", (userIds) => {
+      setOnlineUsers(userIds);
+    });
+
     setSocket(newSocket);
 
     return () => newSocket.disconnect();
   }, [user]);
 
+  const isUserOnline = (userId) => onlineUsers.includes(userId);
+
   return (
-    <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
+    <SocketContext.Provider value={{ socket, onlineUsers, isUserOnline }}>
+      {children}
+    </SocketContext.Provider>
   );
 };

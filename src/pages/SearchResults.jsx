@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
-import SearchBar from "../components/SearchBar";
-import LanguageSwitcher from "../components/LanguageSwitcher";
+import TopBar from "../components/TopBar";
 import MasonryGrid from "../components/MasonryGrid";
 import Loader from "../components/Loader";
 import { useLanguage } from "../context/LanguageContext";
@@ -35,12 +34,7 @@ const SearchResults = () => {
 
   return (
     <PageLayout
-      topBar={
-        <div className="d-flex align-items-center gap-3">
-          <SearchBar />
-          <LanguageSwitcher />
-        </div>
-      }
+      topBar={<TopBar />}
     >
       <h5 className="mb-3">
         {t("search_results_for")} "{query}" {!loading && `(${pins.length})`}

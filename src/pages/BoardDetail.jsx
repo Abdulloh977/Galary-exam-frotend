@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
+import TopBar from "../components/TopBar";
 import Loader from "../components/Loader";
 import Modal from "../components/Modal";
 import { useAuth } from "../context/AuthContext";
@@ -92,7 +93,7 @@ const BoardDetail = () => {
   };
 
   return (
-    <PageLayout>
+    <PageLayout topBar={<TopBar />}>
       <Link to="/boards" className="text-decoration-none text-secondary small mb-3 d-inline-block">
         <i className="bi bi-arrow-left me-1"></i> {t("back_to_boards")}
       </Link>

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import PageLayout from "../components/PageLayout";
-import SearchBar from "../components/SearchBar";
-import LanguageSwitcher from "../components/LanguageSwitcher";
+import TopBar from "../components/TopBar";
 import TopPopularSection from "../components/TopPopularSection";
 import MasonryGrid from "../components/MasonryGrid";
 import Loader from "../components/Loader";
@@ -35,12 +34,7 @@ const Home = () => {
 
   return (
     <PageLayout
-      topBar={
-        <div className="d-flex align-items-center gap-3">
-          <SearchBar />
-          <LanguageSwitcher />
-        </div>
-      }
+      topBar={<TopBar />}
     >
       {loading ? (
         <Loader />

@@ -7,3 +7,6 @@ export const getPinCommentsApi = (pinId) =>
 
 export const deleteCommentApi = (id) =>
   axiosInstance.delete(`/comment/delete/${id}`);
+
+export const updateCommentApi = (id, text) =>
+  axiosInstance.put(`/comment/update/${id}`, { text });
