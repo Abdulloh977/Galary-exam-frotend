@@ -1,25 +1,55 @@
+import React, { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 
-// 1. BU YERDA: onToggleSidebar props qilib qabul qilindi
-const PageLayout = ({ topBar, children, isSidebarOpen, onToggleSidebar }) => {
+const PageLayout = ({ topBar, children, isSidebarOpen: propsIsSidebarOpen, onToggleSidebar }) => {
+  
+  // 1. Agar tashqaridan (Home.jsx'dan) boshqaruv kelmasa, o'zining ichki shtatidan foydalanadi
+  const [internalSidebarOpen, setInternalSidebarOpen] = useState(
+    typeof window !== "undefined" ? window.innerWidth >= 768 : true
+  );
+
+  // Haqiqiy ishlaydigan holat: tashqaridan kelgan props bo'lsa shuni, bo'lmasa ichki holatni oladi
+  const isSidebarOpen = propsIsSidebarOpen !== undefined ? propsIsSidebarOpen : internalSidebarOpen;
+  
+  const handleToggleSidebar = () => {
+    if (onToggleSidebar) {
+      onToggleSidebar(); // Tashqaridagi funksiyani ishga tushiradi (Home.jsx)
+    } else {
+      setInternalSidebarOpen((prev) => !prev); // Ichki holatni o'zgartiradi
+    }
+  };
+
+  // Ekran o'lchami o'zgarganda avtomatik moslashish mantiqi
+  const [windowWidth, setWindowWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1024);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <>
-      {/* 1. Sidebar ochiq yoki yopiqligiga qarab uni yashiramiz yoki ko'rsatamiz */}
+      {/* SIDEBAR REJIMI */}
       <div 
         style={{ 
-          display: isSidebarOpen ? "block" : "none", 
+          display: windowWidth >= 768 ? "block" : (isSidebarOpen ? "block" : "none"), 
           position: "fixed",
-          zIndex: 20
+          top: 0,
+          left: 0,
+          bottom: 0,
+          zIndex: 1040 
         }}
       >
-        {/* 2. BU YERDA: Sidebar'ga funksiya ulab yuborildi */}
-        <Sidebar onToggleSidebar={onToggleSidebar} />
+        <Sidebar onToggleSidebar={handleToggleSidebar} />
       </div>
 
-      {/* 2. Asosiy kontent: Sidebar holatiga qarab chap tarafdan joy tashlaydi */}
+      {/* ASOSIY KONTENT */}
       <div 
         style={{ 
-          marginLeft: isSidebarOpen ? "64px" : "0px", 
+          marginLeft: windowWidth >= 768 ? "64px" : (isSidebarOpen ? "64px" : "0px"), 
           minHeight: "100vh",
           transition: "margin-left 0.2s ease" 
         }}
@@ -29,7 +59,9 @@ const PageLayout = ({ topBar, children, isSidebarOpen, onToggleSidebar }) => {
             className="border-bottom bg-white px-4 py-3"
             style={{ position: "sticky", top: 0, zIndex: 15 }}
           >
-            {topBar}
+            {React.isValidElement(topBar)
+              ? React.cloneElement(topBar, { isSidebarOpen, onToggleSidebar: handleToggleSidebar })
+              : topBar}
           </div>
         )}
         <div className="p-4">{children}</div>

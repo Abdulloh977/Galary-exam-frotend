@@ -15,7 +15,8 @@ const getColumnCount = (width) => {
 // kartaning "..." menyusi qo'shni ustun chegarasida kesilib/yashirinib qolishi
 // mumkin edi. Endi har bir ustun — oddiy flex konteyner, shuning uchun
 // dropdown menyular hech qanday qo'shni elementga xalaqit bermaydi.
-const MasonryGrid = ({ pins, showDeleteButton, onDeleteClick }) => {
+// 💡 TUZATILDI: props ro'yxatiga onTogglePrivacy funksiyasi muvaffaqiyatli qabul qilindi
+const MasonryGrid = ({ pins, showDeleteButton, onDeleteClick, onTogglePrivacy }) => {
   const { t } = useLanguage();
   const [columnCount, setColumnCount] = useState(
     typeof window !== "undefined" ? getColumnCount(window.innerWidth) : 5
@@ -50,6 +51,7 @@ const MasonryGrid = ({ pins, showDeleteButton, onDeleteClick }) => {
               pin={pin}
               showDeleteButton={showDeleteButton}
               onDeleteClick={onDeleteClick}
+              onTogglePrivacy={onTogglePrivacy} // 💡 TUZATILDI: Endi funksiya PinCard ichiga silliq yetib boradi
             />
           ))}
         </div>
