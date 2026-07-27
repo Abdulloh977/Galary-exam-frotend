@@ -13,6 +13,9 @@ const Home = () => {
   const [topPins, setTopPins] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Standart holatda menyu yopiq turadi
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   useEffect(() => {
     const fetchData = async () => {
       try {

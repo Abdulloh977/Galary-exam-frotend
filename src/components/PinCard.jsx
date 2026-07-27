@@ -96,30 +96,39 @@ const PinCard = ({ pin, showDeleteButton, onDeleteClick }) => {
             <i className="bi bi-three-dots"></i>
           </button>
 
-          {showMenu && (
-            <>
-              {/* Tashqariga bosilganda menyu yopilishi uchun ko'rinmas qatlam */}
-              <div
-                className="position-fixed top-0 start-0 w-100 h-100"
-                style={{ zIndex: 10 }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setShowMenu(false);
-                }}
-              ></div>
+          <div className="position-relative">
+            <button
+              className="btn btn-sm border-0 p-0 text-secondary"
+              onClick={toggleMenu}
+              title="..."
+            >
+              <i className="bi bi-three-dots"></i>
+            </button>
 
-              <div
-                className="position-absolute bg-white rounded-3 shadow-sm border py-1"
-                style={{ right: 0, top: "20px", width: "180px", zIndex: 11 }}
-              >
-                <button
-                  className="btn btn-sm w-100 text-start px-3 py-2 border-0"
-                  onClick={handleCopyLink}
+            {showMenu && (
+              <>
+                {/* Tashqariga bosilganda yopilishi uchun */}
+                <div
+                  className="position-fixed top-0 start-0 w-100 h-100"
+                  style={{ zIndex: 10 }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowMenu(false);
+                  }}
+                ></div>
+
+                <div
+                  className="position-absolute bg-white rounded-3 shadow-sm border py-1"
+                  style={{ right: 0, top: "20px", width: "200px", zIndex: 11 }}
                 >
-                  <i className="bi bi-link-45deg me-2"></i>
-                  {t("copy_link")}
-                </button>
+                  <button
+                    className="btn btn-sm w-100 text-start px-3 py-2 border-0"
+                    onClick={handleCopyLink}
+                  >
+                    <i className="bi bi-link-45deg me-2"></i>
+                    {t("copy_link")}
+                  </button>
 
                 <button
                   className="btn btn-sm w-100 text-start px-3 py-2 border-0 d-block"

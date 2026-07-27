@@ -63,10 +63,11 @@ function Login() {
       });
 
       // Google o'zining rasmiy tugmasini ushbu div ichiga chizadi
-      window.google.accounts.id.renderButton(
-        document.getElementById("googleRegisterButton"),
-        { theme: "outline", size: "large", width: "100%", text: "signin_with" }
+      google.accounts.id.renderButton(
+        document.getElementById("googleSignInBtn"), // Shu ID ni tekshiring
+        { theme: "outline", size: "large", width: 360 }
       );
+
     }
   }, [googleReady]);
 
@@ -139,7 +140,7 @@ function Login() {
 
                 <div className="d-flex flex-column gap-2 justify-content-center align-items-center w-100">
                   {/* GOOGLE RASMIY TUGMASI JOYLASHADIGAN DIV */}
-                  <div id="googleRegisterButton" className="w-100 shadow-sm"></div>
+                  <div id="googleSignInBtn" className="w-100 shadow-sm"></div>
 
                   <button 
                     type="button" 
