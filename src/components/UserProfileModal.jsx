@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "../context/LanguageContext";
 
-const IMAGE_BASE_URL = "http://localhost:4000/public";
+const IMAGE_BASE_URL = "https://galary-exam.onrender.com/public";
 
 const formatLastSeen = (dateStr, t) => {
   if (!dateStr) return "";

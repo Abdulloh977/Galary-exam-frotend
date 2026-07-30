@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
-import { useAuth } from "./AuthContext";
+import useAuth from "./AuthContext.jsx"; // 💡 TO'G'RILANDI: Yonidagi fayldan default import qilindi
 
 const SocketContext = createContext();
 
@@ -9,15 +9,14 @@ export const useSocket = () => useContext(SocketContext);
 export const SocketProvider = ({ children }) => {
   const { user } = useAuth();
   const [socket, setSocket] = useState(null);
-  const [onlineUsers, setOnlineUsers] = useState([]); // userId'lar ro'yxati
+  const [onlineUsers, setOnlineUsers] = useState([]);
 
   useEffect(() => {
     if (!user) return;
 
-    // Backend serverimizga ulanamiz
-    const newSocket = io("http://localhost:4000");
-
-    // Ulangandan so'ng, o'z ID'mizni serverga yuboramiz (onlaynligimizni bildirish uchun)
+    // Render-dagi haqiqiy onlayn backend manzilingiz
+    const newSocket = io("https://galary-exam.onrender.com");
+    
     newSocket.on("connect", () => {
       newSocket.emit("addUser", user._id);
     });

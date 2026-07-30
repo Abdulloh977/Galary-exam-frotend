@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom"; 
-import { useAuth } from "../context/AuthContext";
+import useAuth from "../context/AuthContext.jsx";
 import { useLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
 

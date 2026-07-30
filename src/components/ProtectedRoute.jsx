@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import useAuth from "../context/AuthContext.jsx";
 
 // Bu komponent himoyalangan sahifalarni o'rab turadi.
 // Agar foydalanuvchi login qilmagan bo'lsa — avtomatik /login sahifasiga o'tkazadi.

@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import useAuth from "../context/AuthContext.jsx";
 import { useLanguage } from "../context/LanguageContext";
 import { deleteUserApi } from "../api/userApi";
 
-const IMAGE_BASE_URL = "http://localhost:4000/public";
+const IMAGE_BASE_URL = "https://galary-exam.onrender.com/public";
 
 // Qidiruv panelidan keyin (yuqori panelda) ko'rinadigan profil avatari + akkaunt menyusi
 const AccountMenu = () => {

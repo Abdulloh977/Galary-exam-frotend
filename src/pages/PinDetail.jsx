@@ -5,7 +5,7 @@ import TopBar from "../components/TopBar";
 import Loader from "../components/Loader";
 import Modal from "../components/Modal";
 import CommentList from "../components/CommentList";
-import { useAuth } from "../context/AuthContext";
+import useAuth from "../context/AuthContext.jsx";
 import { useLanguage } from "../context/LanguageContext";
 import { getOnePinApi, likePinApi } from "../api/pinApi";
 import { getPinCommentsApi } from "../api/commentApi";
@@ -14,7 +14,7 @@ import { downloadImage } from "../utils/download";
 import { useToast } from "../context/ToastContext";
 import ShareMenu from "../components/ShareMenu";
 
-const IMAGE_BASE_URL = "http://localhost:4000/public";
+const IMAGE_BASE_URL = "https://galary-exam.onrender.com/public";
 
 // Harakat tugmalari uchun umumiy uslub — balandligi kamroq, kengligi kattaroq
 const actionBtnStyle = { padding: "6px 22px", fontSize: "14px" };

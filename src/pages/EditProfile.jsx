@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
 import TopBar from "../components/TopBar";
-import { useAuth } from "../context/AuthContext";
+import useAuth from "../context/AuthContext.jsx";
 import { useLanguage } from "../context/LanguageContext";
 import { updateProfileApi } from "../api/userApi";
 
@@ -17,7 +17,7 @@ const EditProfile = () => {
   const [email, setEmail] = useState(user?.email || "");
   const [avatar, setAvatar] = useState(null);
   const [preview, setPreview] = useState(
-    user?.profilePicture ? `http://localhost:4000/public/${user.profilePicture}` : null
+    user?.profilePicture ? `https://galary-exam.onrender.com/public/${user.profilePicture}` : null
   );
   const [loading, setLoading] = useState(false);
 

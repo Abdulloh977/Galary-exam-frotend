@@ -6,7 +6,7 @@ import { useToast } from "../context/ToastContext";
 import { downloadImage } from "../utils/download";
 import ShareMenu from "./ShareMenu";
 
-const IMAGE_BASE_URL = "http://localhost:4000/public";
+const IMAGE_BASE_URL = "https://galary-exam.onrender.com/public";
 
 const PinCard = ({ pin, showDeleteButton, onDeleteClick, onTogglePrivacy }) => {
   const { t } = useLanguage();

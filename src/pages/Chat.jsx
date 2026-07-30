@@ -4,7 +4,7 @@ import Sidebar from "../components/Sidebar";
 import Loader from "../components/Loader";
 import CallModal from "../components/CallModal";
 import UserProfileModal from "../components/UserProfileModal";
-import { useAuth } from "../context/AuthContext";
+import useAuth from "../context/AuthContext.jsx";
 import { useSocket } from "../context/SocketContext";
 import { useLanguage } from "../context/LanguageContext";
 import { getAllUsersApi, getOneUserApi, blockUserApi, unblockUserApi, deleteUserApi } from "../api/userApi";
@@ -17,7 +17,7 @@ import {
 } from "../api/chatApi";
 import { getContactsApi, saveContactApi, removeContactApi, updateNicknameApi } from "../api/contactApi";
 
-const IMAGE_BASE_URL = "http://localhost:4000/public";
+const IMAGE_BASE_URL = "https://galary-exam.onrender.com/public";
 const STUN_SERVERS = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
 const EMOJIS = ["😀", "😂", "😍", "👍", "🙏", "🔥", "🎉", "😢", "😮", "❤️", "👏", "🤔"];
 

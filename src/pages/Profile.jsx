@@ -4,7 +4,7 @@ import PageLayout from "../components/PageLayout";
 import TopBar from "../components/TopBar";
 import Loader from "../components/Loader";
 import MasonryGrid from "../components/MasonryGrid";
-import { useAuth } from "../context/AuthContext";
+import useAuth from "../context/AuthContext.jsx";
 import { useLanguage } from "../context/LanguageContext";
 import { getProfileApi } from "../api/userApi";
 import { deletePinApi, updatePinApi } from "../api/pinApi";
@@ -95,7 +95,7 @@ const Profile = () => {
             style={{ width: "64px", height: "64px", fontSize: "28px", fontWeight: "600" }}
           >
             {profileUser.profilePicture ? (
-              <img src={`http://localhost:4000/public/${profileUser.profilePicture}`} alt="avatar" className="w-100 h-100" style={{ objectFit: "cover" }} />
+              <img src={`https://galary-exam.onrender.com/public/${profileUser.profilePicture}`} alt="avatar" className="w-100 h-100" style={{ objectFit: "cover" }} />
             ) : (
               profileUser.firstname ? profileUser.firstname[0].toUpperCase() : "U"
             )}

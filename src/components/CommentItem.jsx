@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 
-const IMAGE_BASE_URL = "http://localhost:4000/public";
+const IMAGE_BASE_URL = "https://galary-exam.onrender.com/public";
 
 const CommentItem = ({ comment, canDelete, canEdit, onDelete, onEdit, onReplyClick, isReply }) => {
   const { t } = useLanguage();

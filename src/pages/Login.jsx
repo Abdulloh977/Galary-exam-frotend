@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext.jsx'; 
+import useAuth from "../context/AuthContext.jsx";
 
 function Login() {
   const { login, loginWithGoogle } = useAuth();
@@ -8,17 +8,17 @@ function Login() {
   const [submitting, setSubmitting] = useState(false);
   const [googleReady, setGoogleReady] = useState(false);
 
-  // 1. GOOGLE KUTUBXONASINI TEKSHIRISH VA YUKLASH
+  // 1. RASMIY GOOGLE IDENTITY SCRIPTINI NAZORAT QILISH
   useEffect(() => {
     if (window.google && window.google.accounts && window.google.accounts.id) {
       setGoogleReady(true);
       return;
     }
 
-    let script = document.querySelector('script[src="https://google.com"]');
+    let script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
     if (!script) {
       script = document.createElement('script');
-      script.src = "https://google.com";
+      script.src = "https://accounts.google.com/gsi/client";
       script.async = true;
       script.defer = true;
       document.head.appendChild(script);
@@ -38,11 +38,12 @@ function Login() {
     return () => clearInterval(timer);
   }, []);
 
-  // 2. RASMIY GOOGLE TUGMASINI DINAMIK VA RESPONSIVE RENDER QILISH
+  // 2. LOGIN SAHIFASIDA GOOGLE TUGMASINI CHIQARISH (REGISTER BILAN BIR XIL QILINDI)
   useEffect(() => {
     if (googleReady && window.google?.accounts?.id) {
       window.google.accounts.id.initialize({
-        client_id: "://googleusercontent.com", 
+        // Register sahifangizdagi haqiqiy Client ID qo'yildi:
+        client_id: "380649079838-6tutq6rua4vgfikmavshaj0f7u394pd2.apps.googleusercontent.com", 
         callback: async (response) => {
           try {
             setError('');
@@ -53,7 +54,7 @@ function Login() {
             if (result.success) {
               window.location.href = "/"; 
             } else {
-              setError(result.message);
+              setError(result.message || "Tizimga kirishda xatolik.");
             }
           } catch (err) {
             setSubmitting(false);
@@ -62,21 +63,10 @@ function Login() {
         }
       });
 
-      // 💡 YANGI QO'SHILDI: Ota div kengligini o'qib, Google tugmasini formadan chiqmaydigan qilamiz
-      const btnParent = document.getElementById("googleSignInBtn");
-      // Agar ota div o'lchami kichik bo'lsa (telefonda), o'sha kenglikni oladi, bo'lmasa standart 320px
-      const currentWidth = btnParent && btnParent.offsetWidth > 0 ? btnParent.offsetWidth : 280;
-
+      // Google rasmiy tugmani "googleLoginButton" ID li div ichiga chizadi
       window.google.accounts.id.renderButton(
-        document.getElementById("googleSignInBtn"), 
-        { 
-          theme: "outline", 
-          size: "large", 
-          type: "standard",
-          shape: "rectangular",
-          text: "signin_with", // "Google orqali kirish" matni chiqishi uchun
-          width: currentWidth   // Telefon ekraniga qarab avtomatik moslashuvchi o'lcham
-        }
+        document.getElementById("googleLoginButton"),
+        { theme: "outline", size: "large", width: "100%", text: "signin_with" }
       );
     }
   }, [googleReady]);
@@ -112,7 +102,7 @@ function Login() {
             <div className="card p-4 border-0 shadow-sm rounded-4">
               <div className="text-center mb-4">
                 <i className="bi bi-shield-lock text-success" style={{ fontSize: '3rem' }}></i>
-                <h2 className="fw-bold mt-2 text-dark">Xush kelibsiz</h2>
+                <h2 className="fw-bold mt-2 text-dark fs-4">Xush kelibsiz</h2>
                 <p className="text-muted small">Tizimga kirish uchun ma'lumotlarni kiriting</p>
               </div>
 
@@ -120,22 +110,40 @@ function Login() {
               
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
-                  <label className="form-label small fw-semibold">Email manzili</label>
-                  <div className="input-group">
+                  <label className="form-label small fw-semibold" style={{ fontSize: "13px" }}>Email manzili</label>
+                  <div className="input-group input-group-sm">
                     <span className="input-group-text bg-white text-muted"><i className="bi bi-envelope"></i></span>
-                    <input type="email" className="form-control" name="email" value={formData.email} onChange={handleChange} required />
+                    <input 
+                      type="email" 
+                      className="form-control text-dark" 
+                      name="email" 
+                      placeholder="example@mail.com"
+                      value={formData.email} 
+                      onChange={handleChange} 
+                      style={{ fontSize: "14px", height: "38px" }}
+                      required 
+                    />
                   </div>
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label small fw-semibold">Parol</label>
-                  <div className="input-group">
+                  <label className="form-label small fw-semibold" style={{ fontSize: "13px" }}>Parol</label>
+                  <div className="input-group input-group-sm">
                     <span className="input-group-text bg-white text-muted"><i className="bi bi-lock"></i></span>
-                    <input type="password" className="form-control" name="password" value={formData.password} onChange={handleChange} required />
+                    <input 
+                      type="password" 
+                      className="form-control text-dark" 
+                      name="password" 
+                      placeholder="******"
+                      value={formData.password} 
+                      onChange={handleChange} 
+                      style={{ fontSize: "14px", height: "38px" }}
+                      required 
+                    />
                   </div>
                 </div>
 
-                <button type="submit" disabled={submitting} className="btn btn-success w-100 fw-semibold py-2 rounded-3">
+                <button type="submit" disabled={submitting} className="btn btn-success w-100 fw-semibold py-2 rounded-3" style={{ fontSize: "14px", height: "40px" }}>
                   {submitting ? "Kirilmoqda..." : "Kirish"}
                 </button>
               </form>
@@ -149,22 +157,16 @@ function Login() {
                 </div>
 
                 <div className="d-flex flex-column gap-2 justify-content-center align-items-center w-100">
-                  
-                  {/* 💡 TO'G'RILANDI: Rasmiy tugma qaytarildi va har qanday telefonga sig'adigan ota div qo'yildi */}
-                  <div className="w-100 overflow-hidden d-flex justify-content-center">
-                    <div 
-                      id="googleSignInBtn" 
-                      className="w-100 shadow-sm rounded-3"
-                      style={{ minHeight: "44px", maxWidth: "100%" }}
-                    ></div>
-                  </div>
+                  {/* GOOGLE RASMIY TUGMASI UCHUN DIV (TUZATILDI) */}
+                  <div id="googleLoginButton" className="w-100 shadow-sm"></div>
 
                   <button 
                     type="button" 
                     onClick={handleTwitterLogin} 
-                    className="btn btn-outline-dark d-flex align-items-center justify-content-center gap-2 rounded-3 py-2 px-3 fw-semibold w-100 small shadow-sm mt-1"
+                    className="btn btn-outline-dark d-flex align-items-center justify-content-center gap-2 rounded-3 py-2 px-3 fw-medium w-100 shadow-sm mt-1"
+                    style={{ minHeight: "40px", fontSize: "14px" }}
                   >
-                    <i className="bi bi-twitter-x fs-5"></i> Twitter orqali kirish
+                    <i className="bi bi-twitter-x fs-6"></i> Twitter orqali kirish
                   </button>
                 </div>
               </div>

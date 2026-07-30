@@ -4,7 +4,7 @@ import PageLayout from "../components/PageLayout";
 import TopBar from "../components/TopBar";
 import Loader from "../components/Loader";
 import Modal from "../components/Modal";
-import { useAuth } from "../context/AuthContext";
+import useAuth from "../context/AuthContext.jsx";
 import { useLanguage } from "../context/LanguageContext";
 import {
   getMyBoardsApi,
