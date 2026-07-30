@@ -12,7 +12,7 @@ const LanguageSwitcher = () => {
   return (
     <select
       className="form-select"
-      style={{ width: "80px" }}
+      style={{ width: "65px", height: "30px", fontSize: "12px"}}
       value={lang}
       onChange={(e) => changeLang(e.target.value)}
       aria-label="Select language"

@@ -293,6 +293,44 @@ body.dark-mode .chat-bubble-other {
   color: #e8e8e8;
 }
 
+/* ---------- Chat: responsive shell (desktop 64px sidebar / mobil to'liq eni) ---------- */
+.chat-shell,
+.chat-shell-margin {
+  margin-left: 64px;
+  height: 100vh;
+}
+@media (max-width: 767.98px) {
+  .chat-shell,
+  .chat-shell-margin {
+    margin-left: 0;
+    height: 100dvh;
+    width: 100%;
+  }
+  .chat-list-panel {
+    width: 100% !important;
+  }
+}
+
+/* Mobil pastki tab-bar (Chat sahifasi ro'yxat ekranida) */
+.chat-mobile-tabbar {
+  flex-shrink: 0;
+}
+.chat-mobile-tabbar button i {
+  color: #495057;
+}
+.chat-mobile-tabbar button.text-danger i {
+  color: var(--accent);
+}
+body.dark-mode .chat-mobile-tabbar {
+  border-color: #333 !important;
+}
+body.dark-mode .chat-mobile-tabbar button i {
+  color: #e8e8e8;
+}
+body.dark-mode .chat-mobile-tabbar button.text-danger i {
+  color: var(--accent);
+}
+
 /* Tahrirlash/o'chirish tugmalari faqat hover'da ko'rinadi */
 .message-actions {
   opacity: 0;

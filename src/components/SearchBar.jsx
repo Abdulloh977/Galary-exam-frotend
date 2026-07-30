@@ -18,7 +18,7 @@ const SearchBar = () => {
     <form onSubmit={handleSubmit} className="flex-grow-1">
       <div
         className="d-flex align-items-center gap-2 search-glass rounded-pill px-3 py-2"
-        style={{ maxWidth: "620px" }}
+        style={{ maxWidth: "1000px" }}
       >
         <i className="bi bi-search text-secondary"></i>
         <input

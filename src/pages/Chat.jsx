@@ -26,11 +26,10 @@ const formatTime = (dateStr) => {
   return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 };
 
-const UserRow = ({ person, active, onClick, subtitle, isOnline, rightSlot, displayName }) => (
+const UserRow = ({ person, active, onClick, subtitle, isOnline, rightSlot, displayName, unreadCount }) => (
   <div
-    className={`d-flex align-items-center gap-1 rounded-3 mb-1 px-2 py-2 chat-user-row ${
-      active ? "chat-user-row-active" : ""
-    }`}
+    className={`d-flex align-items-center gap-1 rounded-3 mb-1 px-2 py-2 chat-user-row ${active ? "chat-user-row-active" : ""
+      }`}
   >
     <button
       onClick={onClick}
@@ -65,14 +64,25 @@ const UserRow = ({ person, active, onClick, subtitle, isOnline, rightSlot, displ
         )}
       </div>
       <div className="flex-grow-1 overflow-hidden">
-        <p className="mb-0 small fw-medium text-truncate">
+        <p className={`mb-0 small text-truncate ${unreadCount ? "fw-bold" : "fw-medium"}`}>
           {displayName || `${person.firstname} ${person.lastname}`}
         </p>
         {subtitle && (
-          <p className="mb-0 small text-secondary text-truncate">{subtitle}</p>
+          <p className={`mb-0 small text-truncate ${unreadCount ? "fw-semibold text-dark" : "text-secondary"}`}>
+            {subtitle}
+          </p>
         )}
       </div>
     </button>
+    {!!unreadCount && (
+      <span
+        className="badge rounded-pill bg-danger flex-shrink-0"
+        style={{ fontSize: "10px", minWidth: "18px", padding: "3px 6px" }}
+        title={`${unreadCount} ta o'qilmagan xabar`}
+      >
+        {unreadCount > 99 ? "99+" : unreadCount}
+      </span>
+    )}
     {rightSlot}
   </div>
 );
@@ -162,6 +172,9 @@ const Chat = () => {
         if (socket) {
           socket.emit("markSeen", { viewerId: user._id, otherUserId: selectedUser._id });
         }
+        setConversations((prev) =>
+          prev.map((c) => (c.userId === selectedUser._id ? { ...c, unreadCount: 0 } : c))
+        );
       } catch (error) {
         console.error("Suhbat tarixini yuklashda xatolik:", error);
       }
@@ -170,19 +183,29 @@ const Chat = () => {
     fetchHistory();
   }, [selectedUser]);
 
-  const updateConversationPreview = (otherUserId, previewText) => {
+  const updateConversationPreview = (otherUserId, previewText, incrementUnread = false) => {
     setConversations((prev) => {
       const exists = prev.find((c) => c.userId === otherUserId);
       const updated = exists
         ? prev.map((c) =>
-            c.userId === otherUserId
-              ? { ...c, lastMessage: previewText, createdAt: new Date().toISOString() }
-              : c
-          )
+          c.userId === otherUserId
+            ? {
+              ...c,
+              lastMessage: previewText,
+              createdAt: new Date().toISOString(),
+              unreadCount: incrementUnread ? (c.unreadCount || 0) + 1 : c.unreadCount || 0,
+            }
+            : c
+        )
         : [
-            { userId: otherUserId, lastMessage: previewText, createdAt: new Date().toISOString() },
-            ...prev,
-          ];
+          {
+            userId: otherUserId,
+            lastMessage: previewText,
+            createdAt: new Date().toISOString(),
+            unreadCount: incrementUnread ? 1 : 0,
+          },
+          ...prev,
+        ];
       return updated;
     });
   };
@@ -192,12 +215,13 @@ const Chat = () => {
     if (!socket) return;
 
     const handleIncoming = (message) => {
-      if (selectedUser && message.sender === selectedUser._id) {
+      const isOpenChat = selectedUser && message.sender === selectedUser._id;
+      if (isOpenChat) {
         setMessages((prev) => [...prev, message]);
         socket.emit("markSeen", { viewerId: user._id, otherUserId: selectedUser._id });
       }
       const preview = message.imageUrl ? `📷 ${t("send_image")}` : message.text;
-      updateConversationPreview(message.sender, preview);
+      updateConversationPreview(message.sender, preview, !isOpenChat);
     };
 
     const handleSentAck = (savedMessage) => {
@@ -606,16 +630,21 @@ const Chat = () => {
 
   const filteredAllUsers = leftSearchTerm.trim()
     ? allUsers.filter((u) => {
-        const full = `${u.firstname} ${u.lastname} ${u.username}`.toLowerCase();
-        return full.includes(leftSearchTerm.toLowerCase());
-      })
+      const full = `${u.firstname} ${u.lastname} ${u.username}`.toLowerCase();
+      return full.includes(leftSearchTerm.toLowerCase());
+    })
     : allUsers;
+
+  // Kontaktga saqlanmagan foydalanuvchilar (ro'yxatda kontaktlar bilan takrorlanmasligi uchun)
+  const nonContactUsers = filteredAllUsers.filter((u) => !isContact(u._id));
 
   if (loading) {
     return (
       <div className="d-flex">
-        <Sidebar />
-        <div className="flex-grow-1" style={{ marginLeft: "64px" }}>
+        <div className="d-none d-md-block">
+          <Sidebar />
+        </div>
+        <div className="flex-grow-1 chat-shell-margin">
           <Loader />
         </div>
       </div>
@@ -624,11 +653,17 @@ const Chat = () => {
 
   return (
     <div className="d-flex">
-      <Sidebar />
+      <div className="d-none d-md-block">
+        <Sidebar />
+      </div>
 
-      <div className="d-flex flex-grow-1" style={{ height: "100vh", marginLeft: "64px" }}>
-        {/* Chap panel — qidiruv + barcha foydalanuvchilar */}
-        <div className="border-end d-flex flex-column" style={{ width: "260px", flexShrink: 0 }}>
+      <div className="d-flex flex-grow-1 chat-shell">
+        {/* Chap panel — ro'yxat: mobil'da kontaktlar + qolgan foydalanuvchilar, desktop'da qidiruv + barcha foydalanuvchilar */}
+        <div
+          className={`border-end flex-column chat-list-panel ${selectedUser ? "d-none d-md-flex" : "d-flex"
+            }`}
+          style={{ width: "260px", flexShrink: 0 }}
+        >
           <div className="p-3 border-bottom">
             <div className="d-flex align-items-center gap-2 bg-light rounded-pill px-3 py-2">
               <i className="bi bi-search text-secondary"></i>
@@ -642,38 +677,91 @@ const Chat = () => {
             </div>
           </div>
 
-          <p className="text-secondary small px-3 mt-2 mb-1">{t("chat_all_users")}</p>
-          <div className="flex-grow-1 overflow-auto px-2">
-            {filteredAllUsers.map((person) => (
-              <UserRow
-                key={person._id}
-                person={person}
-                active={selectedUser?._id === person._id}
-                isOnline={isUserOnline(person._id)}
-                displayName={getContactRecord(person._id)?.nickname}
-                onClick={() => handleSelectUser(person)}
-                rightSlot={
-                  <button
-                    className="btn btn-sm p-0 text-secondary flex-shrink-0"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleContact(person);
-                    }}
-                    title={isContact(person._id) ? t("remove_contact") : t("save_contact")}
-                  >
-                    <i
-                      className={`bi ${
-                        isContact(person._id) ? "bi-bookmark-fill text-danger" : "bi-bookmark"
-                      }`}
-                    ></i>
-                  </button>
-                }
-              />
-            ))}
+          <div className="flex-grow-1 overflow-auto">
+            {/* MOBIL: Kontaktlar bo'limi — faqat telefonda ko'rinadi, tepada turadi */}
+            <div className="d-md-none">
+              <p className="text-secondary small px-3 mt-2 mb-1">{t("chat_contacts")}</p>
+              <div className="px-2">
+                {contacts.length === 0 ? (
+                  <p className="text-secondary small px-2">{t("chat_no_contacts")}</p>
+                ) : (
+                  contacts.map((c) => {
+                    const person = c.contact;
+                    if (!person) return null;
+                    const conv = conversations.find((cv) => cv.userId === person._id);
+                    return (
+                      <UserRow
+                        key={`m-${c._id}`}
+                        person={person}
+                        active={selectedUser?._id === person._id}
+                        isOnline={isUserOnline(person._id)}
+                        subtitle={conv?.lastMessage}
+                        displayName={c.nickname}
+                        unreadCount={conv?.unreadCount}
+                        onClick={() => handleSelectUser(person)}
+                      />
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            <p className="text-secondary small px-3 mt-2 mb-1">{t("chat_all_users")}</p>
+            <div className="px-2">
+              {nonContactUsers.map((person) => {
+                const conv = conversations.find((cv) => cv.userId === person._id);
+                return (
+                  <UserRow
+                    key={person._id}
+                    person={person}
+                    active={selectedUser?._id === person._id}
+                    isOnline={isUserOnline(person._id)}
+                    subtitle={conv?.lastMessage}
+                    unreadCount={conv?.unreadCount}
+                    onClick={() => handleSelectUser(person)}
+                    rightSlot={
+                      <button
+                        className="btn btn-sm p-0 text-secondary flex-shrink-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleContact(person);
+                        }}
+                        title={t("save_contact")}
+                      >
+                        <i className="bi bi-bookmark"></i>
+                      </button>
+                    }
+                  />
+                );
+              })}
+            </div>
           </div>
 
-          {/* Mening akkauntim — profilga tezkor kirish */}
-          <div className="border-top p-2 position-relative">
+          {/* MOBIL: pastki tab-bar navigatsiyasi */}
+          <div className="d-flex d-md-none justify-content-around align-items-center border-top py-2 chat-mobile-tabbar">
+            <button className="btn border-0 p-2" onClick={() => navigate("/")} title={t("sidebar_home")}>
+              <i className="bi bi-house-fill fs-5"></i>
+            </button>
+            <button className="btn border-0 p-2" onClick={() => navigate("/boards")} title={t("sidebar_boards")}>
+              <i className="bi bi-grid-fill fs-5"></i>
+            </button>
+            <button
+              className="btn rounded-circle d-flex align-items-center pb-2 justify-content-center flex-shrink-0"
+              style={{width: "50px",height: "50px",}}
+              onClick={() => navigate("/pin/create")}
+              title={t("sidebar_create")}>
+              <i className="bi bi-plus-lg" style={{fontSize: "35px", fontWeight: "100",}}></i>
+            </button>
+            <button className="btn border-0 p-2 text-danger" onClick={() => navigate("/chat")} title={t("sidebar_chat")}>
+              <i className="bi bi-chat-dots-fill fs-5"></i>
+            </button>
+            <button className="btn border-0 p-2" onClick={() => navigate(`/profile/${user._id}`)} title={t("view_profile")}>
+              <i className="bi bi-person-fill fs-5"></i>
+            </button>
+          </div>
+
+          {/* Mening akkauntim — profilga tezkor kirish (faqat desktop, mobil'da tab-bar bor) */}
+          <div className="border-top p-2 position-relative d-none d-md-block">
             {showMyAccountMenu && (
               <>
                 <div
@@ -747,7 +835,10 @@ const Chat = () => {
         </div>
 
         {/* O'rta panel — tanlangan suhbat */}
-        <div className="flex-grow-1 d-flex flex-column position-relative">
+        <div
+          className={`flex-grow-1 flex-column position-relative ${selectedUser ? "d-flex" : "d-none d-md-flex"
+            }`}
+        >
           {!selectedUser ? (
             <div className="d-flex flex-grow-1 flex-column align-items-center justify-content-center text-center px-3">
               <div
@@ -780,6 +871,15 @@ const Chat = () => {
           ) : (
             <>
               <div className="p-3 border-bottom d-flex align-items-center gap-2 chat-header">
+                <button
+                  type="button"
+                  className="btn p-0 border-0 d-md-none flex-shrink-0"
+                  onClick={() => setSelectedUser(null)}
+                  title={t("back") || "Orqaga"}
+                  style={{ fontSize: "20px" }}
+                >
+                  <i className="bi bi-arrow-left"></i>
+                </button>
                 <button
                   className="btn p-0 border-0 d-flex align-items-center gap-2 flex-grow-1 text-start"
                   onClick={() => openProfileModal(selectedUser)}
@@ -905,9 +1005,8 @@ const Chat = () => {
                             </form>
                           ) : (
                             <div
-                              className={`px-3 py-2 chat-bubble ${
-                                isMine ? "chat-bubble-mine" : "chat-bubble-other"
-                              }`}
+                              className={`px-3 py-2 chat-bubble ${isMine ? "chat-bubble-mine" : "chat-bubble-other"
+                                }`}
                             >
                               {m.imageUrl && (
                                 <img
@@ -922,9 +1021,8 @@ const Chat = () => {
                           )}
                           {!isEditing && (
                             <div
-                              className={`d-flex align-items-center gap-1 mt-1 ${
-                                isMine ? "justify-content-end" : ""
-                              }`}
+                              className={`d-flex align-items-center gap-1 mt-1 ${isMine ? "justify-content-end" : ""
+                                }`}
                             >
                               {m.edited && (
                                 <span className="text-secondary" style={{ fontSize: "10px" }}>
@@ -936,9 +1034,8 @@ const Chat = () => {
                               </span>
                               {isMine && (
                                 <i
-                                  className={`bi ${
-                                    m.seen ? "bi-check2-all text-primary" : "bi-check2"
-                                  }`}
+                                  className={`bi ${m.seen ? "bi-check2-all text-primary" : "bi-check2"
+                                    }`}
                                   style={{ fontSize: "12px" }}
                                 ></i>
                               )}
@@ -1033,8 +1130,8 @@ const Chat = () => {
           )}
         </div>
 
-        {/* O'ng panel — saqlangan kontaktlar */}
-        <div className="border-start d-flex flex-column" style={{ width: "260px", flexShrink: 0 }}>
+        {/* O'ng panel — saqlangan kontaktlar (faqat desktop; mobil'da kontaktlar chap ro'yxat tepasida) */}
+        <div className="border-start d-none d-md-flex flex-column" style={{ width: "260px", flexShrink: 0 }}>
           <p className="text-secondary small px-3 pt-3 mb-1">{t("chat_contacts")}</p>
           <div className="flex-grow-1 overflow-auto px-2">
             {contacts.length === 0 ? (
@@ -1052,6 +1149,7 @@ const Chat = () => {
                     isOnline={isUserOnline(person._id)}
                     subtitle={conv?.lastMessage}
                     displayName={c.nickname}
+                    unreadCount={conv?.unreadCount}
                     onClick={() => handleSelectUser(person)}
                     rightSlot={
                       <button

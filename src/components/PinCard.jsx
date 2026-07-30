@@ -7,7 +7,6 @@ import ShareMenu from "./ShareMenu";
 
 const IMAGE_BASE_URL = "http://localhost:4000/public";
 
-// 💡 ANIQ TEKSHIRING: onTogglePrivacy props ro'yxatida bo'lishi shart!
 const PinCard = ({ pin, showDeleteButton, onDeleteClick, onTogglePrivacy }) => {
   const { t } = useLanguage();
   const { showToast } = useToast();
@@ -31,11 +30,26 @@ const PinCard = ({ pin, showDeleteButton, onDeleteClick, onTogglePrivacy }) => {
     setShowMenu(false);
   };
 
-  const handleShare = (e) => {
+  // 💡 JIDDIY TUZATILDI: Telefonda telefoni o'zining ulashish tizimini ochamiz
+  const handleShare = async (e) => {
     e.preventDefault();
     e.stopPropagation();
     setShowMenu(false);
-    setShowShareMenu(true);
+
+    // Agar foydalanuvchi telefonda (navigator.share bor ekranda) bo'lsa
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: pin.title || "Pinterest Pin",
+          url: pinUrl,
+        });
+      } catch (err) {
+        console.log("Native share bekor qilindi yoki xato:", err);
+      }
+    } else {
+      // Noutbukda (navigator.share bo'lmagan joyda) o'zimizning ShareMenu ochiladi
+      setShowShareMenu(true);
+    }
   };
 
   const handleDownload = (e) => {
@@ -52,7 +66,6 @@ const PinCard = ({ pin, showDeleteButton, onDeleteClick, onTogglePrivacy }) => {
     onDeleteClick(pin._id);
   };
 
-  // Checkbox bosilganda sahifaga o'tib ketmasligi uchun eventni to'xtatamiz
   const handleCheckboxChange = (e) => {
     e.stopPropagation();
     if (onTogglePrivacy) {
@@ -61,144 +74,159 @@ const PinCard = ({ pin, showDeleteButton, onDeleteClick, onTogglePrivacy }) => {
   };
 
   return (
-    <>
-      <div
-        className="position-relative"
-        style={{ position: "relative", zIndex: showMenu || showShareMenu ? 1000 : "auto" }}
-      >
-        <Link to={`/pin/${pin._id}`} className="d-block text-decoration-none">
-          <div className="rounded-4 overflow-hidden position-relative pin-image-wrap">
-            <img
-              src={imageUrl}
-              alt={pin.title}
-              className="w-100 d-block"
-              style={{ objectFit: "cover" }}
-            />
-          </div>
+    <div
+      className="position-relative"
+      style={{ position: "relative", zIndex: showMenu || showShareMenu ? 1000 : "auto" }}
+    >
+      <Link to={`/pin/${pin._id}`} className="d-block text-decoration-none">
+        <div className="rounded-4 overflow-hidden position-relative pin-image-wrap">
+          <img
+            src={imageUrl}
+            alt={pin.title}
+            className="w-100 d-block"
+            style={{ objectFit: "cover" }}
+          />
+        </div>
+      </Link>
+
+      <div className="pt-2 d-flex align-items-center justify-content-between">
+        <Link
+          to={`/pin/${pin._id}`}
+          className="text-decoration-none text-dark small text-truncate flex-grow-1"
+        >
+          {pin.title}
         </Link>
 
-        <div className="pt-2 d-flex align-items-center justify-content-between">
-          <Link
-            to={`/pin/${pin._id}`}
-            className="text-decoration-none text-dark small text-truncate flex-grow-1"
-          >
-            {pin.title}
-          </Link>
+        <div className="d-flex align-items-center gap-2 flex-shrink-0">
+          <span className="d-flex align-items-center gap-1 text-secondary small" title={t("views")}>
+            <i className="bi bi-eye"></i>
+            {pin.views || 0}
+          </span>
+          <span className="d-flex align-items-center gap-1 text-secondary small" title={t("likes")}>
+            <i className="bi bi-heart"></i>
+            {pin.likesCount ?? (pin.likes ? pin.likes.length : 0)}
+          </span>
 
-          <div className="d-flex align-items-center gap-2 flex-shrink-0">
-            <span className="d-flex align-items-center gap-1 text-secondary small" title={t("views")}>
-              <i className="bi bi-eye"></i>
-              {pin.views || 0}
-            </span>
-            <span className="d-flex align-items-center gap-1 text-secondary small" title={t("likes")}>
-              <i className="bi bi-heart"></i>
-              {pin.likes ? pin.likes.length : 0}
-            </span>
+          <div className="position-relative">
+            <button
+              className="btn btn-sm border-0 p-0 text-secondary"
+              onClick={toggleMenu}
+              title="..."
+            >
+              <i className="bi bi-three-dots"></i>
+            </button>
 
-            <div className="position-relative">
-              <button
-                className="btn btn-sm border-0 p-0 text-secondary"
-                onClick={toggleMenu}
-                title="..."
-              >
-                <i className="bi bi-three-dots"></i>
-              </button>
+            {showMenu && (
+              <>
+                <div
+                  className="position-fixed top-0 start-0 w-100 h-100"
+                  style={{ zIndex: 10 }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowMenu(false);
+                  }}
+                ></div>
 
-              {showMenu && (
-                <>
-                  <div
-                    className="position-fixed top-0 start-0 w-100 h-100"
-                    style={{ zIndex: 10 }}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setShowMenu(false);
-                    }}
-                  ></div>
-
-                  <div
-                    className="position-absolute bg-white rounded-3 shadow-sm border py-1 animate-fade-in"
-                    style={{ right: 0, top: "24px", width: "180px", zIndex: 11 }}
+                <div
+                  className="position-absolute bg-white rounded-3 shadow-sm border py-1 animate-fade-in"
+                  style={{ right: 0, top: "20px", width: "180px", zIndex: 11 }}
+                >
+                  <button
+                    className="btn btn-sm w-100 text-start px-3 py-2 border-0"
+                    onClick={handleCopyLink}
                   >
-                    <button
-                      className="btn btn-sm w-100 text-start px-3 py-2 border-0"
-                      onClick={handleCopyLink}
-                    >
-                      <i className="bi bi-link-45deg me-2"></i>
-                      {t("copy_link")}
-                    </button>
+                    <i className="bi bi-link-45deg me-2"></i>
+                    {t("copy_link")}
+                  </button>
 
-                    <button
-                      className="btn btn-sm w-100 text-start px-3 py-2 border-0 d-block"
-                      onClick={handleDownload}
-                    >
-                      <i className="bi bi-download me-2"></i>
-                      {t("download")}
-                    </button>
+                  <button
+                    className="btn btn-sm w-100 text-start px-3 py-2 border-0 d-block"
+                    onClick={handleDownload}
+                  >
+                    <i className="bi bi-download me-2"></i>
+                    {t("download")}
+                  </button>
 
-                    <button
-                      className="btn btn-sm w-100 text-start px-3 py-2 border-0"
-                      onClick={handleShare}
-                    >
-                      <i className="bi bi-share me-2"></i>
-                      {t("share")}
-                    </button>
+                  <button
+                    className="btn btn-sm w-100 text-start px-3 py-2 border-0"
+                    onClick={handleShare}
+                  >
+                    <i className="bi bi-share me-2"></i>
+                    {t("share")}
+                  </button>
 
-                    {showDeleteButton && (
-                      <>
-                        <hr className="my-1 text-black-50" />
-                        <div 
-                          className="px-3 py-2 d-flex align-items-center gap-2"
-                          onClick={(e) => e.stopPropagation()} 
+                  {showDeleteButton && (
+                    <>
+                      <hr className="my-1 text-black-50" />
+                      <div 
+                        className="px-3 py-2 d-flex align-items-center gap-2"
+                        onClick={(e) => e.stopPropagation()} 
+                      >
+                        <input
+                          className="form-check-input m-0"
+                          type="checkbox"
+                          id={`hide-home-${pin._id}`}
+                          style={{ cursor: "pointer", width: "16px", height: "16px" }}
+                          checked={pin.isPrivate || false}
+                          onChange={handleCheckboxChange}
+                        />
+                        <label 
+                          className="form-check-label small user-select-none text-dark mb-0" 
+                          htmlFor={`hide-home-${pin._id}`}
+                          style={{ cursor: "pointer", fontSize: "12px" }}
                         >
-                          <input
-                            className="form-check-input m-0"
-                            type="checkbox"
-                            id={`hide-home-${pin._id}`}
-                            style={{ cursor: "pointer", width: "16px", height: "16px" }}
-                            checked={pin.isPrivate || false}
-                            onChange={handleCheckboxChange} // 💡 FUNKSIYA ULAndi
-                          />
-                          <label 
-                            className="form-check-label small user-select-none text-dark mb-0" 
-                            htmlFor={`hide-home-${pin._id}`}
-                            style={{ cursor: "pointer", fontSize: "12px" }}
-                          >
-                            Lentadan yashirish
-                          </label>
-                        </div>
-                      </>
-                    )}
+                          Lentadan yashirish
+                        </label>
+                      </div>
+                    </>
+                  )}
 
-                    {showDeleteButton && (
-                      <>
-                        <hr className="my-1 text-black-50" />
-                        <button
-                          className="btn btn-sm w-100 text-start px-3 py-2 border-0 text-danger"
-                          onClick={handleDeleteClick}
-                        >
-                          <i className="bi bi-trash3 me-2"></i>
-                          {t("delete")}
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </>
-              )}
+                  {showDeleteButton && (
+                    <>
+                      <hr className="my-1 text-black-50" />
+                      <button
+                        className="btn btn-sm w-100 text-start px-3 py-2 border-0 text-danger"
+                        onClick={handleDeleteClick}
+                      >
+                        <i className="bi bi-trash3 me-2"></i>
+                        {t("delete")}
+                      </button>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
 
-              {showShareMenu && (
-                <ShareMenu
-                  url={pinUrl}
-                  title={pin.title}
-                  onClose={() => setShowShareMenu(false)}
-                  style={{ right: 0, top: "20px" }}
-                />
-              )}
-            </div>
+            {/* 💡 Noutbuk uchun ShareMenu ochilish qismi */}
+            {showShareMenu && (
+              <>
+                <div
+                  className="position-fixed top-0 start-0 w-100 h-100"
+                  style={{ zIndex: 1040 }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowShareMenu(false);
+                  }}
+                ></div>
+                <div 
+                  className="position-absolute bg-white rounded-3 shadow-lg border p-2"
+                  style={{ right: 0, top: "20px", zIndex: 9999, width: "220px" }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <ShareMenu
+                    url={pinUrl}
+                    title={pin.title}
+                    onClose={() => setShowShareMenu(false)}
+                  />
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

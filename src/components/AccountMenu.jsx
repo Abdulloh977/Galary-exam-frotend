@@ -57,7 +57,7 @@ const AccountMenu = () => {
       >
         <div
           className="rounded-circle bg-success d-flex align-items-center justify-content-center text-white overflow-hidden flex-shrink-0"
-          style={{ width: "32px", height: "32px", fontSize: "13px" }}
+          style={{ width: "44px", height: "44px", fontSize: "13px" }}
         >
           {user.profilePicture ? (
             <img

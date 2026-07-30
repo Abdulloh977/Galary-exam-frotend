@@ -197,7 +197,7 @@ const PinDetail = () => {
               style={actionBtnStyle}
               onClick={openSaveModal}
             >
-              <i className="bi bi-bookmark-fill me-1"></i> {t("save_pin")}
+              <i className="bi bi-bookmark-fill me-1"></i> {t("")}
             </button>
           </div>
 
