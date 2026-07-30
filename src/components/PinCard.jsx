@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { createPortal } from "react-dom"; // 💡 YANGI QO'SHILDI: Menyuni bodyga chiqarish uchun
 import { useLanguage } from "../context/LanguageContext";
 import { useToast } from "../context/ToastContext";
 import { downloadImage } from "../utils/download";
@@ -12,13 +13,27 @@ const PinCard = ({ pin, showDeleteButton, onDeleteClick, onTogglePrivacy }) => {
   const { showToast } = useToast();
   const [showMenu, setShowMenu] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  
+  // 💡 YANGI QO'SHILDI: Tugmaning ekrandagi aniq o'rnini (koordinatasini) aniqlash uchun ref
+  const buttonRef = useRef(null);
+  const [menuCoords, setMenuCoords] = useState({ top: 0, left: 0 });
 
-  const imageUrl = `${IMAGE_BASE_URL}/${pin.imageUrl}`;
+  const currentImage = pin.image || pin.imageUrl || "";
+  const imageUrl = `${IMAGE_BASE_URL}/${currentImage}`;
   const pinUrl = `${window.location.origin}/pin/${pin._id}`;
 
+  // 💡 YANGI QO'SHILDI: Uchta nuqta bosilganda uning ekrandagi o'rnini hisoblab, menyuni shundoq tagiga joylashtirish
   const toggleMenu = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (!showMenu && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setMenuCoords({
+        top: rect.bottom + window.scrollY + 5, // Tugmaning tagidan 5px pastda
+        left: rect.left + window.scrollX - 160 // Chapga surib, formaga tekislash
+      });
+    }
     setShowMenu((v) => !v);
   };
 
@@ -26,17 +41,15 @@ const PinCard = ({ pin, showDeleteButton, onDeleteClick, onTogglePrivacy }) => {
     e.preventDefault();
     e.stopPropagation();
     navigator.clipboard.writeText(pinUrl);
-    showToast(t("link_copied"));
+    showToast(t("link_copied") || "Havola nusxalandi!");
     setShowMenu(false);
   };
 
-  // 💡 JIDDIY TUZATILDI: Telefonda telefoni o'zining ulashish tizimini ochamiz
   const handleShare = async (e) => {
     e.preventDefault();
     e.stopPropagation();
     setShowMenu(false);
 
-    // Agar foydalanuvchi telefonda (navigator.share bor ekranda) bo'lsa
     if (navigator.share) {
       try {
         await navigator.share({
@@ -44,10 +57,9 @@ const PinCard = ({ pin, showDeleteButton, onDeleteClick, onTogglePrivacy }) => {
           url: pinUrl,
         });
       } catch (err) {
-        console.log("Native share bekor qilindi yoki xato:", err);
+        console.log("Native share bekor qilindi:", err);
       }
     } else {
-      // Noutbukda (navigator.share bo'lmagan joyda) o'zimizning ShareMenu ochiladi
       setShowShareMenu(true);
     }
   };
@@ -56,14 +68,14 @@ const PinCard = ({ pin, showDeleteButton, onDeleteClick, onTogglePrivacy }) => {
     e.preventDefault();
     e.stopPropagation();
     setShowMenu(false);
-    downloadImage(imageUrl, pin.imageUrl || `${pin.title || "pin"}.jpg`);
+    downloadImage(imageUrl, currentImage || `${pin.title || "pin"}.jpg`);
   };
 
   const handleDeleteClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setShowMenu(false);
-    onDeleteClick(pin._id);
+    if (onDeleteClick) onDeleteClick(pin._id);
   };
 
   const handleCheckboxChange = (e) => {
@@ -74,10 +86,7 @@ const PinCard = ({ pin, showDeleteButton, onDeleteClick, onTogglePrivacy }) => {
   };
 
   return (
-    <div
-      className="position-relative"
-      style={{ position: "relative", zIndex: showMenu || showShareMenu ? 1000 : "auto" }}
-    >
+    <div className="position-relative">
       <Link to={`/pin/${pin._id}`} className="d-block text-decoration-none">
         <div className="rounded-4 overflow-hidden position-relative pin-image-wrap">
           <img
@@ -108,19 +117,23 @@ const PinCard = ({ pin, showDeleteButton, onDeleteClick, onTogglePrivacy }) => {
           </span>
 
           <div className="position-relative">
+            {/* 💡 TUZATILDI: ref biriktirildi */}
             <button
+              ref={buttonRef}
               className="btn btn-sm border-0 p-0 text-secondary"
               onClick={toggleMenu}
-              title="..."
+              type="button"
             >
-              <i className="bi bi-three-dots"></i>
+              <i className="bi bi-three-dots fs-5"></i>
             </button>
 
-            {showMenu && (
+            {/* 💡 YANGILANDI: createPortal orqali kichik menyuni rasm cheklovlaridan chiqarib, body'ga otamiz */}
+            {showMenu && createPortal(
               <>
+                {/* Global orqa fon (Menyudan tashqari bosilganda yopilishi uchun) */}
                 <div
                   className="position-fixed top-0 start-0 w-100 h-100"
-                  style={{ zIndex: 10 }}
+                  style={{ zIndex: 9998, background: "transparent" }}
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -128,41 +141,33 @@ const PinCard = ({ pin, showDeleteButton, onDeleteClick, onTogglePrivacy }) => {
                   }}
                 ></div>
 
+                {/* Haqiqiy erkin harakatlanuvchi absolute quti */}
                 <div
-                  className="position-absolute bg-white rounded-3 shadow-sm border py-1 animate-fade-in"
-                  style={{ right: 0, top: "20px", width: "180px", zIndex: 11 }}
+                  className="position-absolute bg-white rounded-3 shadow border py-1"
+                  style={{ 
+                    top: `${menuCoords.top}px`, 
+                    left: `${menuCoords.left}px`, 
+                    width: "190px", 
+                    zIndex: 9999 
+                  }}
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <button
-                    className="btn btn-sm w-100 text-start px-3 py-2 border-0"
-                    onClick={handleCopyLink}
-                  >
-                    <i className="bi bi-link-45deg me-2"></i>
-                    {t("copy_link")}
+                  <button className="btn btn-sm w-100 text-start px-3 py-2 border-0" onClick={handleCopyLink}>
+                    <i className="bi bi-link-45deg me-2"></i> {t("copy_link")}
                   </button>
 
-                  <button
-                    className="btn btn-sm w-100 text-start px-3 py-2 border-0 d-block"
-                    onClick={handleDownload}
-                  >
-                    <i className="bi bi-download me-2"></i>
-                    {t("download")}
+                  <button className="btn btn-sm w-100 text-start px-3 py-2 border-0" onClick={handleDownload}>
+                    <i className="bi bi-download me-2"></i> {t("download")}
                   </button>
 
-                  <button
-                    className="btn btn-sm w-100 text-start px-3 py-2 border-0"
-                    onClick={handleShare}
-                  >
-                    <i className="bi bi-share me-2"></i>
-                    {t("share")}
+                  <button className="btn btn-sm w-100 text-start px-3 py-2 border-0" onClick={handleShare}>
+                    <i className="bi bi-share me-2"></i> {t("share")}
                   </button>
 
                   {showDeleteButton && (
                     <>
                       <hr className="my-1 text-black-50" />
-                      <div 
-                        className="px-3 py-2 d-flex align-items-center gap-2"
-                        onClick={(e) => e.stopPropagation()} 
-                      >
+                      <div className="px-3 py-2 d-flex align-items-center gap-2">
                         <input
                           className="form-check-input m-0"
                           type="checkbox"
@@ -185,43 +190,14 @@ const PinCard = ({ pin, showDeleteButton, onDeleteClick, onTogglePrivacy }) => {
                   {showDeleteButton && (
                     <>
                       <hr className="my-1 text-black-50" />
-                      <button
-                        className="btn btn-sm w-100 text-start px-3 py-2 border-0 text-danger"
-                        onClick={handleDeleteClick}
-                      >
-                        <i className="bi bi-trash3 me-2"></i>
-                        {t("delete")}
+                      <button className="btn btn-sm w-100 text-start px-3 py-2 border-0 text-danger" onClick={handleDeleteClick}>
+                        <i className="bi bi-trash3 me-2"></i> {t("delete")}
                       </button>
                     </>
                   )}
                 </div>
-              </>
-            )}
-
-            {/* 💡 Noutbuk uchun ShareMenu ochilish qismi */}
-            {showShareMenu && (
-              <>
-                <div
-                  className="position-fixed top-0 start-0 w-100 h-100"
-                  style={{ zIndex: 1040 }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setShowShareMenu(false);
-                  }}
-                ></div>
-                <div 
-                  className="position-absolute bg-white rounded-3 shadow-lg border p-2"
-                  style={{ right: 0, top: "20px", zIndex: 9999, width: "220px" }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <ShareMenu
-                    url={pinUrl}
-                    title={pin.title}
-                    onClose={() => setShowShareMenu(false)}
-                  />
-                </div>
-              </>
+              </>,
+              document.body
             )}
           </div>
         </div>

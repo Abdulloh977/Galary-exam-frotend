@@ -7,7 +7,7 @@ import MasonryGrid from "../components/MasonryGrid";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { getProfileApi } from "../api/userApi";
-import { deletePinApi, updatePinApi } from "../api/pinApi"; // updatePinApi borligi aniqlandi
+import { deletePinApi, updatePinApi } from "../api/pinApi";
 
 const Profile = () => {
   const { id } = useParams();
@@ -66,7 +66,7 @@ const Profile = () => {
     }
   };
 
-  // 💡 QAYTA TIKLANDI: O'chib ketgan asosiy yashirish funksiyasi shu yerga qo'shildi
+  // 💡 CHAQIRILISHI: Uchta nuqta va maxfiylik tugmasi bosilganda ishlaydigan asosiy funksiya
   const handleTogglePrivacy = async (pinId, isChecked) => {
     try {
       await updatePinApi(pinId, { isPrivate: isChecked });
@@ -84,50 +84,81 @@ const Profile = () => {
   if (!profileUser) return <PageLayout topBar={<TopBar />}><p>Not found</p></PageLayout>;
 
   return (
-    <PageLayout topBar={<TopBar />} onTogglePrivacy={handleTogglePrivacy}>
-      <div className="d-flex justify-content-between align-items-start mb-4">
-        <div>
-          <div className="rounded-circle bg-success d-flex align-items-center justify-content-center text-white mb-2 overflow-hidden" style={{ width: "64px", height: "64px", fontSize: "24px" }}>
+    /* 💡 TO'G'RILANDI: Unknown event handler xatosini bergan qism olib tashlandi, PageLayout toza holatga keltirildi */
+    <PageLayout topBar={<TopBar />}>
+      
+      {/* Profil ma'lumotlari bo'limi (Telefon versiyaga mos responsive) */}
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-center align-items-md-start mb-4 text-center text-md-start gap-3">
+        <div className="d-flex flex-column flex-md-row align-items-center gap-3">
+          <div 
+            className="rounded-circle bg-success d-flex align-items-center justify-content-center text-white overflow-hidden flex-shrink-0" 
+            style={{ width: "64px", height: "64px", fontSize: "28px", fontWeight: "600" }}
+          >
             {profileUser.profilePicture ? (
               <img src={`http://localhost:4000/public/${profileUser.profilePicture}`} alt="avatar" className="w-100 h-100" style={{ objectFit: "cover" }} />
             ) : (
-              profileUser.firstname ? profileUser.firstname.toUpperCase() : "U"
+              profileUser.firstname ? profileUser.firstname[0].toUpperCase() : "U"
             )}
           </div>
-          <h3 className="mb-1">{profileUser.firstname} {profileUser.lastname}</h3>
-          <p className="text-secondary small mb-0">@{profileUser.username}</p>
+          <div>
+            <h3 className="mb-1 fs-4 fw-bold">{profileUser.firstname} {profileUser.lastname}</h3>
+            <p className="text-secondary small mb-0">@{profileUser.username}</p>
+          </div>
         </div>
-        <div className="d-flex gap-2">
-          <button className="btn btn-light rounded-pill" onClick={handleShareProfile}>
-            <i className="bi bi-share me-1"></i>{copied ? t("copied") : t("share_profile")}
+
+        {/* Tugmalar (Kichraytirilgan responsive variant) */}
+        <div className="d-flex gap-2 flex-wrap justify-content-center">
+          <button className="btn btn-light btn-sm rounded-pill px-3 py-2 fw-medium shadow-sm" onClick={handleShareProfile}>
+            <i className="bi bi-share me-1"></i>
+            <span className="small">{copied ? t("copied") : t("share_profile")}</span>
           </button>
+          
           {isOwnProfile ? (
             <>
-              <Link to="/profile/edit" className="btn btn-light rounded-pill"><i className="bi bi-pencil me-1"></i> {t("edit_profile")}</Link>
-              <Link to="/pin/create" className="btn btn-danger rounded-pill"><i className="bi bi-plus-lg me-1"></i> {t("sidebar_create")}</Link>
+              <Link to="/profile/edit" className="btn btn-light btn-sm rounded-pill px-3 py-2 fw-medium shadow-sm">
+                <i className="bi bi-pencil me-1"></i> 
+                <span className="small">{t("edit_profile")}</span>
+              </Link>
+              <Link to="/pin/create" className="btn btn-danger btn-sm rounded-pill px-3 py-2 fw-medium shadow-sm">
+                <i className="bi bi-plus-lg me-1"></i> 
+                <span className="small">{t("sidebar_create")}</span>
+              </Link>
             </>
           ) : (
-            <button className="btn btn-danger rounded-pill" onClick={handleSendMessage}><i className="bi bi-chat-dots me-1"></i> {t("send_message")}</button>
+            <button className="btn btn-danger btn-sm rounded-pill px-3 py-2 fw-medium shadow-sm" onClick={handleSendMessage}>
+              <i className="bi bi-chat-dots me-1"></i> 
+              <span className="small">{t("send_message")}</span>
+            </button>
           )}
         </div>
       </div>
 
-      <div className="d-flex gap-4 border-bottom mb-4">
+      {/* Tablar bo'limi */}
+      <div className="d-flex gap-4 border-bottom mb-4 justify-content-center justify-content-md-start">
         <button className={`btn border-0 rounded-0 pb-2 ${activeTab === "pins" ? "border-bottom border-dark border-2 fw-medium" : "text-secondary"}`} onClick={() => setActiveTab("pins")}>{t("pins_tab")}</button>
         <button className={`btn border-0 rounded-0 pb-2 ${activeTab === "boards" ? "border-bottom border-dark border-2 fw-medium" : "text-secondary"}`} onClick={() => setActiveTab("boards")}>{t("boards_tab")}</button>
       </div>
 
+      {/* Kontent qismi */}
       {activeTab === "pins" ? (
-        <MasonryGrid pins={pins} showDeleteButton={isOwnProfile} onDeleteClick={handleDeletePin} onTogglePrivacy={handleTogglePrivacy} />
+        <div className="w-100 overflow-hidden">
+          {/* 💡 TO'G'RILANDI: onTogglePrivacy mantiqlari bevosita MasonryGrid'ning o'ziga ulandi, endi uchta nuqta va uning ichidagi checkbox to'liq ishlaydi */}
+          <MasonryGrid 
+            pins={pins} 
+            showDeleteButton={isOwnProfile} 
+            onDeleteClick={handleDeletePin} 
+            onTogglePrivacy={handleTogglePrivacy} 
+          />
+        </div>
       ) : boards.length === 0 ? (
-        <p className="text-secondary">{t("no_boards_yet")}</p>
+        <p className="text-secondary text-center text-md-start mt-3">{t("no_boards_yet")}</p>
       ) : (
         <div className="row g-3">
           {boards.map((board) => (
             <div className="col-6 col-md-4 col-lg-3" key={board._id}>
               <Link to={`/board/${board._id}`} className="text-decoration-none text-dark">
                 <div className="rounded-4 bg-light d-flex align-items-center justify-content-center mb-2" style={{ height: "140px" }}><i className="bi bi-folder fs-1 text-secondary"></i></div>
-                <p className="mb-0 fw-medium text-truncate">{board.title}</p>
+                <p className="mb-0 fw-medium text-truncate text-center text-md-start">{board.title}</p>
               </Link>
             </div>
           ))}

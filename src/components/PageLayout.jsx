@@ -2,24 +2,20 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 
 const PageLayout = ({ topBar, children, isSidebarOpen: propsIsSidebarOpen, onToggleSidebar }) => {
-  
-  // 1. Agar tashqaridan (Home.jsx'dan) boshqaruv kelmasa, o'zining ichki shtatidan foydalanadi
   const [internalSidebarOpen, setInternalSidebarOpen] = useState(
     typeof window !== "undefined" ? window.innerWidth >= 768 : true
   );
 
-  // Haqiqiy ishlaydigan holat: tashqaridan kelgan props bo'lsa shuni, bo'lmasa ichki holatni oladi
   const isSidebarOpen = propsIsSidebarOpen !== undefined ? propsIsSidebarOpen : internalSidebarOpen;
   
   const handleToggleSidebar = () => {
     if (onToggleSidebar) {
-      onToggleSidebar(); // Tashqaridagi funksiyani ishga tushiradi (Home.jsx)
+      onToggleSidebar(); 
     } else {
-      setInternalSidebarOpen((prev) => !prev); // Ichki holatni o'zgartiradi
+      setInternalSidebarOpen((prev) => !prev); 
     }
   };
 
-  // Ekran o'lchami o'zgarganda avtomatik moslashish mantiqi
   const [windowWidth, setWindowWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1024);
 
   useEffect(() => {
@@ -64,6 +60,7 @@ const PageLayout = ({ topBar, children, isSidebarOpen: propsIsSidebarOpen, onTog
               : topBar}
           </div>
         )}
+        {/* 💡 TO'G'RILANDI: Hech qanday majburiy xossalarsiz, o'z holicha toza children qaytarildi */}
         <div className="p-4">{children}</div>
       </div>
     </>

@@ -8,17 +8,17 @@ function Login() {
   const [submitting, setSubmitting] = useState(false);
   const [googleReady, setGoogleReady] = useState(false);
 
-  // 1. GOOGLE KUTUBXONASINI TEKSHIRISH (XUDDI REGISTERDAGIDEK)
+  // 1. GOOGLE KUTUBXONASINI TEKSHIRISH VA YUKLASH
   useEffect(() => {
     if (window.google && window.google.accounts && window.google.accounts.id) {
       setGoogleReady(true);
       return;
     }
 
-    let script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+    let script = document.querySelector('script[src="https://google.com"]');
     if (!script) {
       script = document.createElement('script');
-      script.src = "https://accounts.google.com/gsi/client";
+      script.src = "https://google.com";
       script.async = true;
       script.defer = true;
       document.head.appendChild(script);
@@ -38,11 +38,11 @@ function Login() {
     return () => clearInterval(timer);
   }, []);
 
-  // 2. RASMIY GOOGLE TUGMASINI INITIALIZE VA RENDER QILISH
+  // 2. RASMIY GOOGLE TUGMASINI DINAMIK VA RESPONSIVE RENDER QILISH
   useEffect(() => {
     if (googleReady && window.google?.accounts?.id) {
       window.google.accounts.id.initialize({
-        client_id: "380649079838-6tutq6rua4vgfikmavshaj0f7u394pd2.apps.googleusercontent.com", 
+        client_id: "://googleusercontent.com", 
         callback: async (response) => {
           try {
             setError('');
@@ -62,12 +62,22 @@ function Login() {
         }
       });
 
-      // Google o'zining rasmiy tugmasini ushbu div ichiga chizadi
-      google.accounts.id.renderButton(
-        document.getElementById("googleSignInBtn"), // Shu ID ni tekshiring
-        { theme: "outline", size: "large", width: 360 }
-      );
+      // 💡 YANGI QO'SHILDI: Ota div kengligini o'qib, Google tugmasini formadan chiqmaydigan qilamiz
+      const btnParent = document.getElementById("googleSignInBtn");
+      // Agar ota div o'lchami kichik bo'lsa (telefonda), o'sha kenglikni oladi, bo'lmasa standart 320px
+      const currentWidth = btnParent && btnParent.offsetWidth > 0 ? btnParent.offsetWidth : 280;
 
+      window.google.accounts.id.renderButton(
+        document.getElementById("googleSignInBtn"), 
+        { 
+          theme: "outline", 
+          size: "large", 
+          type: "standard",
+          shape: "rectangular",
+          text: "signin_with", // "Google orqali kirish" matni chiqishi uchun
+          width: currentWidth   // Telefon ekraniga qarab avtomatik moslashuvchi o'lcham
+        }
+      );
     }
   }, [googleReady]);
 
@@ -98,7 +108,7 @@ function Login() {
     <div className="d-flex align-items-center min-vh-100 py-5 bg-light">
       <div className="container">
         <div className="row justify-content-center">
-          <div className="col-10 col-sm-8 col-md-6 col-lg-4">
+          <div className="col-11 col-sm-8 col-md-6 col-lg-4">
             <div className="card p-4 border-0 shadow-sm rounded-4">
               <div className="text-center mb-4">
                 <i className="bi bi-shield-lock text-success" style={{ fontSize: '3rem' }}></i>
@@ -139,8 +149,15 @@ function Login() {
                 </div>
 
                 <div className="d-flex flex-column gap-2 justify-content-center align-items-center w-100">
-                  {/* GOOGLE RASMIY TUGMASI JOYLASHADIGAN DIV */}
-                  <div id="googleSignInBtn" className="w-100 shadow-sm"></div>
+                  
+                  {/* 💡 TO'G'RILANDI: Rasmiy tugma qaytarildi va har qanday telefonga sig'adigan ota div qo'yildi */}
+                  <div className="w-100 overflow-hidden d-flex justify-content-center">
+                    <div 
+                      id="googleSignInBtn" 
+                      className="w-100 shadow-sm rounded-3"
+                      style={{ minHeight: "44px", maxWidth: "100%" }}
+                    ></div>
+                  </div>
 
                   <button 
                     type="button" 
