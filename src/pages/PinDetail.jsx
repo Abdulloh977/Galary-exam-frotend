@@ -14,7 +14,7 @@ import { downloadImage } from "../utils/download";
 import { useToast } from "../context/ToastContext";
 import ShareMenu from "../components/ShareMenu";
 
-const IMAGE_BASE_URL = "https://galary-exam.onrender.com/public";
+const IMAGE_BASE_URL = "https://onrender.com";
 
 // Harakat tugmalari uchun umumiy uslub — balandligi kamroq, kengligi kattaroq
 const actionBtnStyle = { padding: "6px 22px", fontSize: "14px" };
@@ -143,7 +143,7 @@ const PinDetail = () => {
   return (
     <PageLayout topBar={<TopBar />}>
       <div className="row g-4" style={{ maxWidth: "900px" }}>
-        {/* Rasm */}
+        {/* Rasm qismi */}
         <div className="col-md-6">
           <img
             src={`${IMAGE_BASE_URL}/${pin.imageUrl}`}
@@ -153,7 +153,7 @@ const PinDetail = () => {
           />
         </div>
 
-        {/* Ma'lumotlar */}
+        {/* Ma'lumotlar qismi */}
         <div className="col-md-6">
           <div className="d-flex gap-2 mb-3 flex-wrap">
             <button
@@ -197,7 +197,7 @@ const PinDetail = () => {
               style={actionBtnStyle}
               onClick={openSaveModal}
             >
-              <i className="bi bi-bookmark-fill me-1"></i> {t("")}
+              <i className="bi bi-bookmark-fill me-1"></i> {t("save")}
             </button>
           </div>
 
