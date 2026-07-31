@@ -156,10 +156,11 @@ const PinDetail = () => {
         {/* Ma'lumotlar qismi */}
         <div className="col-md-6">
           {/* 💡 TUZATILDI: flex-nowrap qilindi, tugmalar bitta qatorda, pastga tushib ketmaydi */}
-          <div className="d-flex gap-1 gap-sm-2 mb-3 flex-nowrap align-items-center w-100 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+                    {/* 💡 TUZATILDI: Save yozuvi butunlay olib tashlandi, faqat ikonka Yuklash tugmasining yoniga joylandi */}
+          <div className="d-flex gap-2 mb-3 flex-nowrap align-items-center w-100 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
             <button
               className={`btn ${liked ? "btn-danger" : "btn-outline-danger"} rounded-pill d-flex align-items-center justify-content-center`}
-              style={btnInlineStyle}
+              style={{ padding: "6px 14px", fontSize: "13px", whiteSpace: "nowrap" }}
               onClick={handleLike}
             >
               <i className="bi bi-heart-fill me-1"></i> {likesCount}
@@ -168,7 +169,7 @@ const PinDetail = () => {
             <div className="position-relative">
               <button
                 className="btn btn-outline-secondary rounded-pill d-flex align-items-center justify-content-center"
-                style={btnInlineStyle}
+                style={{ padding: "6px 14px", fontSize: "13px", whiteSpace: "nowrap" }}
                 onClick={handleShare}
               >
                 <i className="bi bi-share me-1"></i>
@@ -187,20 +188,23 @@ const PinDetail = () => {
 
             <button
               className="btn btn-outline-secondary rounded-pill d-flex align-items-center justify-content-center"
-              style={btnInlineStyle}
+              style={{ padding: "6px 14px", fontSize: "13px", whiteSpace: "nowrap" }}
               onClick={handleDownloadClick}
             >
               <i className="bi bi-download me-1"></i> {t("download")}
             </button>
 
+            {/* 💡 MANA SHU YERDA: Matn o'chirildi, faqat yuklash yonidagi chiroyli dumaloq ikonka qoldi */}
             <button
               className="btn btn-dark rounded-pill d-flex align-items-center justify-content-center"
-              style={{ padding: "6px 14px", fontSize: "13px", whiteSpace: "nowrap" }}
+              style={{ padding: "6px 14px", fontSize: "13px" }}
               onClick={openSaveModal}
+              title={t("save") || "Save"}
             >
-              <i className="bi bi-bookmark-fill me-1"></i> {t("save") || "Save"}
+              <i className="bi bi-bookmark-fill"></i>
             </button>
           </div>
+
 
           <h4>{pin.title}</h4>
           <p className="text-secondary">{pin.description}</p>
