@@ -14,7 +14,7 @@ import { downloadImage } from "../utils/download";
 import { useToast } from "../context/ToastContext";
 import ShareMenu from "../components/ShareMenu";
 
-const IMAGE_BASE_URL = "https://onrender.com";
+const IMAGE_BASE_URL = "https://galary-exam.onrender.com/public";
 
 // Tugmalar bitta qatorga chiroyli sig'ishi uchun ixcham inline uslublar
 const btnInlineStyle = { padding: "6px 12px", fontSize: "13px", whiteSpace: "nowrap" };
