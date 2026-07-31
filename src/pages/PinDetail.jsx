@@ -14,10 +14,10 @@ import { downloadImage } from "../utils/download";
 import { useToast } from "../context/ToastContext";
 import ShareMenu from "../components/ShareMenu";
 
-const IMAGE_BASE_URL = "https://galary-exam.onrender.com/public";
+const IMAGE_BASE_URL = "https://onrender.com";
 
-// Harakat tugmalari uchun umumiy uslub — balandligi kamroq, kengligi kattaroq
-const actionBtnStyle = { padding: "6px 22px", fontSize: "14px" };
+// Tugmalar bitta qatorga chiroyli sig'ishi uchun ixcham inline uslublar
+const btnInlineStyle = { padding: "6px 12px", fontSize: "13px", whiteSpace: "nowrap" };
 
 const PinDetail = () => {
   const { id } = useParams();
@@ -143,7 +143,7 @@ const PinDetail = () => {
   return (
     <PageLayout topBar={<TopBar />}>
       <div className="row g-4" style={{ maxWidth: "900px" }}>
-        {/* Rasm */}
+        {/* Rasm qismi */}
         <div className="col-md-6">
           <img
             src={`${IMAGE_BASE_URL}/${pin.imageUrl}`}
@@ -153,13 +153,13 @@ const PinDetail = () => {
           />
         </div>
 
-        {/* Ma'lumotlar */}
+        {/* Ma'lumotlar qismi */}
         <div className="col-md-6">
-          {/* 💡 TUZATILDI: ms-auto olib tashlandi, Save tugmasi Download yoniga chiziqli qilib joylandi */}
-          <div className="d-flex gap-2 mb-3 flex-wrap align-items-center">
+          {/* 💡 TUZATILDI: flex-nowrap qilindi, tugmalar bitta qatorda, pastga tushib ketmaydi */}
+          <div className="d-flex gap-1 gap-sm-2 mb-3 flex-nowrap align-items-center w-100 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
             <button
-              className={`btn ${liked ? "btn-danger" : "btn-outline-danger"} rounded-pill`}
-              style={actionBtnStyle}
+              className={`btn ${liked ? "btn-danger" : "btn-outline-danger"} rounded-pill d-flex align-items-center justify-content-center`}
+              style={btnInlineStyle}
               onClick={handleLike}
             >
               <i className="bi bi-heart-fill me-1"></i> {likesCount}
@@ -167,8 +167,8 @@ const PinDetail = () => {
 
             <div className="position-relative">
               <button
-                className="btn btn-outline-secondary rounded-pill"
-                style={actionBtnStyle}
+                className="btn btn-outline-secondary rounded-pill d-flex align-items-center justify-content-center"
+                style={btnInlineStyle}
                 onClick={handleShare}
               >
                 <i className="bi bi-share me-1"></i>
@@ -186,17 +186,16 @@ const PinDetail = () => {
             </div>
 
             <button
-              className="btn btn-outline-secondary rounded-pill"
-              style={actionBtnStyle}
+              className="btn btn-outline-secondary rounded-pill d-flex align-items-center justify-content-center"
+              style={btnInlineStyle}
               onClick={handleDownloadClick}
             >
               <i className="bi bi-download me-1"></i> {t("download")}
             </button>
 
-            {/* 💡 SAVE TUGMASI SHU YERGA KO'CHIRILDI (ms-auto olib tashlandi va t("save") yozildi) */}
             <button
-              className="btn btn-dark rounded-pill"
-              style={actionBtnStyle}
+              className="btn btn-dark rounded-pill d-flex align-items-center justify-content-center"
+              style={{ padding: "6px 14px", fontSize: "13px", whiteSpace: "nowrap" }}
               onClick={openSaveModal}
             >
               <i className="bi bi-bookmark-fill me-1"></i> {t("save") || "Save"}
@@ -241,7 +240,7 @@ const PinDetail = () => {
                   style={{ objectFit: "cover" }}
                 />
               ) : (
-                pin.owner.firstname ? pin.owner.firstname[0].toUpperCase() : "U"
+                pin.owner.firstname ? pin.owner.firstname.toUpperCase() : "U"
               )}
             </div>
             <span className="small fw-medium">
@@ -289,24 +288,24 @@ const PinDetail = () => {
             </div>
           )}
 
-          <hr />
+        <hr />
 
-          <form onSubmit={handleCreateBoardAndSave} className="d-flex gap-2">
-                      <input
-              type="text"
-              className="form-control"
-              placeholder={t("new_board_placeholder")}
-              value={newBoardTitle}
-              onChange={(e) => setNewBoardTitle(e.target.value)}
-            />
-            <button className="btn btn-dark" type="submit">
-              {t("create")}
-            </button>
-          </form>
-        </Modal>
-      )}
-    </PageLayout>
-  );
+        <form onSubmit={handleCreateBoardAndSave} className="d-flex gap-2">
+          <input
+            type="text"
+            className="form-control"
+            placeholder={t("new_board_placeholder")}
+            value={newBoardTitle}
+            onChange={(e) => setNewBoardTitle(e.target.value)}
+          />
+          <button className="btn btn-dark" type="submit">
+            {t("create")}
+          </button>
+        </form>
+      </Modal>
+    )}
+  </PageLayout>
+);
 };
 
 export default PinDetail;
