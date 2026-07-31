@@ -155,7 +155,8 @@ const PinDetail = () => {
 
         {/* Ma'lumotlar */}
         <div className="col-md-6">
-          <div className="d-flex gap-2 mb-3 flex-wrap">
+          {/* 💡 TUZATILDI: ms-auto olib tashlandi, Save tugmasi Download yoniga chiziqli qilib joylandi */}
+          <div className="d-flex gap-2 mb-3 flex-wrap align-items-center">
             <button
               className={`btn ${liked ? "btn-danger" : "btn-outline-danger"} rounded-pill`}
               style={actionBtnStyle}
@@ -192,12 +193,13 @@ const PinDetail = () => {
               <i className="bi bi-download me-1"></i> {t("download")}
             </button>
 
+            {/* 💡 SAVE TUGMASI SHU YERGA KO'CHIRILDI (ms-auto olib tashlandi va t("save") yozildi) */}
             <button
-              className="btn btn-dark rounded-pill ms-auto"
+              className="btn btn-dark rounded-pill"
               style={actionBtnStyle}
               onClick={openSaveModal}
             >
-              <i className="bi bi-bookmark-fill me-1"></i> {t("")}
+              <i className="bi bi-bookmark-fill me-1"></i> {t("save") || "Save"}
             </button>
           </div>
 
@@ -290,7 +292,7 @@ const PinDetail = () => {
           <hr />
 
           <form onSubmit={handleCreateBoardAndSave} className="d-flex gap-2">
-            <input
+                      <input
               type="text"
               className="form-control"
               placeholder={t("new_board_placeholder")}
