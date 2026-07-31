@@ -66,6 +66,7 @@ const Profile = () => {
     }
   };
 
+  // 💡 CHAQIRILISHI: Uchta nuqta va maxfiylik tugmasi bosilganda ishlaydigan asosiy funksiya
   const handleTogglePrivacy = async (pinId, isChecked) => {
     try {
       await updatePinApi(pinId, { isPrivate: isChecked });
@@ -83,17 +84,18 @@ const Profile = () => {
   if (!profileUser) return <PageLayout topBar={<TopBar />}><p>Not found</p></PageLayout>;
 
   return (
+    /* 💡 TO'G'RILANDI: Unknown event handler xatosini bergan qism olib tashlandi, PageLayout toza holatga keltirildi */
     <PageLayout topBar={<TopBar />}>
       
+      {/* Profil ma'lumotlari bo'limi (Telefon versiyaga mos responsive) */}
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-center align-items-md-start mb-4 text-center text-md-start gap-3">
         <div className="d-flex flex-column flex-md-row align-items-center gap-3">
           <div 
             className="rounded-circle bg-success d-flex align-items-center justify-content-center text-white overflow-hidden flex-shrink-0" 
             style={{ width: "64px", height: "64px", fontSize: "28px", fontWeight: "600" }}
           >
-            {/* 💡 TO'G'RILANDI: Eski Render URL olib tashlandi, faqat profilePicture o'zi qo'yildi */}
             {profileUser.profilePicture ? (
-              <img src={profileUser.profilePicture} alt="avatar" className="w-100 h-100" style={{ objectFit: "cover" }} />
+              <img src={`https://galary-exam.onrender.com/public/${profileUser.profilePicture}`} alt="avatar" className="w-100 h-100" style={{ objectFit: "cover" }} />
             ) : (
               profileUser.firstname ? profileUser.firstname[0].toUpperCase() : "U"
             )}
@@ -104,6 +106,7 @@ const Profile = () => {
           </div>
         </div>
 
+        {/* Tugmalar (Kichraytirilgan responsive variant) */}
         <div className="d-flex gap-2 flex-wrap justify-content-center">
           <button className="btn btn-light btn-sm rounded-pill px-3 py-2 fw-medium shadow-sm" onClick={handleShareProfile}>
             <i className="bi bi-share me-1"></i>
@@ -130,13 +133,16 @@ const Profile = () => {
         </div>
       </div>
 
+      {/* Tablar bo'limi */}
       <div className="d-flex gap-4 border-bottom mb-4 justify-content-center justify-content-md-start">
         <button className={`btn border-0 rounded-0 pb-2 ${activeTab === "pins" ? "border-bottom border-dark border-2 fw-medium" : "text-secondary"}`} onClick={() => setActiveTab("pins")}>{t("pins_tab")}</button>
         <button className={`btn border-0 rounded-0 pb-2 ${activeTab === "boards" ? "border-bottom border-dark border-2 fw-medium" : "text-secondary"}`} onClick={() => setActiveTab("boards")}>{t("boards_tab")}</button>
       </div>
 
+      {/* Kontent qismi */}
       {activeTab === "pins" ? (
         <div className="w-100 overflow-hidden">
+          {/* 💡 TO'G'RILANDI: onTogglePrivacy mantiqlari bevosita MasonryGrid'ning o'ziga ulandi, endi uchta nuqta va uning ichidagi checkbox to'liq ishlaydi */}
           <MasonryGrid 
             pins={pins} 
             showDeleteButton={isOwnProfile} 
