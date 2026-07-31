@@ -14,7 +14,7 @@ import { downloadImage } from "../utils/download";
 import { useToast } from "../context/ToastContext";
 import ShareMenu from "../components/ShareMenu";
 
-const IMAGE_BASE_URL = "https://galary-exam.onrender.com/public";
+// const IMAGE_BASE_URL = "https://galary-exam.onrender.com/public";
 
 // Tugmalar bitta qatorga chiroyli sig'ishi uchun ixcham inline uslublar
 const btnInlineStyle = { padding: "6px 12px", fontSize: "13px", whiteSpace: "nowrap" };
@@ -238,7 +238,7 @@ const PinDetail = () => {
             >
               {pin.owner.profilePicture ? (
                 <img
-                  src={`${IMAGE_BASE_URL}/${pin.owner.profilePicture}`}
+                  src={pin.imageUrl}
                   alt="avatar"
                   className="w-100 h-100"
                   style={{ objectFit: "cover" }}
